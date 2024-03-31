@@ -1,0 +1,41 @@
+/* Exact fonts that were used in the original,
+    not sure which weights were used where
+    so they're used interchangeably where needed.
+*/
+/* @font-face {
+    font-family: 'myriadpro';
+    src: url(/assets/fonts/myriadpro_regular.otf);
+}
+@font-face {
+    font-family: 'myriadpro_bold';
+    src: url(/assets/fonts/myriadpro_bold.otf);
+}
+@font-face {
+    font-family: 'myriadpro_light';
+    src: url(/assets/fonts/myriadpro_light.otf);
+} */
+
+canvas {
+    margin: auto;
+    display: block;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    user-select: none;
+}
+
+body {
+    margin-top: 0px;
+    background-color: black;
+    color: white;
+    line-height: 1.6;
+}
+
+.copyright {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+}
