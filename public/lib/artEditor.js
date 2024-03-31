@@ -17,6 +17,7 @@ import { RotMGSpriteLoader } from "./assets/RotMGSpriteLoader/RotMGSpriteLoader.
 import { UIBase } from "./ui/uiBase.js";
 import { Auth } from "./api/auth.js";
 import { LegalScreen } from "./ui/screens/legalScreen.js";
+import { PreloadScreen } from "./ui/screens/preloadScreen.js";
 
 export const ArtEditor = (function () {
     return class ArtEditor {
@@ -36,6 +37,9 @@ export const ArtEditor = (function () {
 
             this.legalScreen = new LegalScreen();
             this.uiRoot.addObject(this.legalScreen);
+
+            this.preloadScreen = new PreloadScreen();
+            this.uiRoot.addObject(this.preloadScreen);
 
             // this.editorScreen.visible = false;
             // this.welcomeScreen.visible = false;
@@ -108,10 +112,12 @@ export const ArtEditor = (function () {
                     Sounds.unmuteMusic(true);
                     Sounds.unmuteSfx(true);
                     this.mute.imageRectOffset = new Vector2(0, 0);
+                    localStorage.setItem('mute', 'false');
                 } else {
                     Sounds.muteMusic(true);
                     Sounds.muteSfx(true);
                     this.mute.imageRectOffset = new Vector2(16, 0);
+                    localStorage.setItem('mute', 'true');
                 }
             });
 
@@ -130,16 +136,41 @@ export const ArtEditor = (function () {
                 console.error('Error decoding user from jwt:', error);
                 this.user = null;
                 this.editorScreen.onUserLogout();
-            } 
+            }
+
+            try {
+                const isMuted = localStorage.getItem('mute');
+
+                if (isMuted === 'true') {
+                    Sounds.muteMusic(true);
+                    Sounds.muteSfx(true);
+                    this.mute.imageRectOffset = new Vector2(16, 0);
+                } else if (isMuted === undefined) {
+                    localStorage.setItem('mute', 'false');
+                }
+            } catch (error) {
+                localStorage.setItem('mute', 'false');
+            }
 
             this.initialized = true;
             this.initializing = false;
         }
 
         async preloadAll () {
-            // await Sounds.preloadAll();
-            await Sprite.preloadAll();
+            this.preloadScreen.visible = true;
+
+            await Sounds.preloadAll((amount, total) => {
+                this.preloadScreen.text = `Loading Sounds... ${Math.floor(amount / total * 100)}%`;
+            });
+
+            await Sprite.preloadAll((amount, total) => {
+                this.preloadScreen.text = `Loading Sprites... ${Math.floor(amount / total * 100)}%`;
+            });
+
+            this.preloadScreen.text = `Loading Assets...`;
             await RotMGSpriteLoader.preloadAll();
+
+            this.preloadScreen.visible = false;
         }
 
         globalStart () {

@@ -39,12 +39,28 @@ export const Sprite = (function () {
         }
 
         // preloads all the images for the game
-        static async preloadAll () {
-            return Promise.all([
+        static async preloadAll (callback) {
+            let totalLoaded = 0;
+            
+            const promises = [
                 Sprite.getImage(Sprite.IMG_BACKGROUND),
                 Sprite.getImage(Sprite.IMG_TRANSPARENT_TILE),
                 Sprite.getImage(Sprite.IMG_ICONS)
-            ]);
+            ];
+
+            if (callback) {
+                promises.forEach(promise => {
+                    promise.then(() => {
+                        totalLoaded++;
+    
+                        callback(totalLoaded, promises.length);
+                    });
+                });
+    
+                callback(totalLoaded, promises.length);
+            }
+
+            return Promise.all(promises);
         }
 
         // caches a given image url

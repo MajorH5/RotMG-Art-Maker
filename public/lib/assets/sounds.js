@@ -26,12 +26,26 @@ export const Sounds = (function () {
 
         static activeSounds = [];
 
-        static async preloadAll() {
+        static async preloadAll(callback) {
+            let totalLoaded = 0;
+
             let promises = Object.values(Sounds)
                 .filter(sound => sound instanceof AudioSource)
                 .map(sound => {
                     return sound.load();
                 });
+
+            if (callback) {
+                promises.forEach(promise => {
+                    promise.then(() => {
+                        totalLoaded++;
+    
+                        callback(totalLoaded, promises.length);
+                    });
+                });
+    
+                callback(totalLoaded, promises.length);
+            }
 
             return Promise.all(promises);
         }
