@@ -5,7 +5,7 @@ export const Constants = (function () {
 
     return {
         MOBILE_ENVIRONMENT: false,
-        ORIGIN: DEV_ENVIRONMENT ? "http://localhost" : "http://rotmgartmaker.com",
+        ORIGIN: DEV_ENVIRONMENT ? "http://localhost" : "https://rotmgartmaker.com",
         DEFAULT_CANVAS_SIZE: new Vector2(880, 700),
     }
 })();
