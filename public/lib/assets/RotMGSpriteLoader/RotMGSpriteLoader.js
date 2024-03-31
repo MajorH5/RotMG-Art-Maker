@@ -36,7 +36,7 @@ export const RotMGSpriteLoader = (function () {
         }
 
         waitLoad () {
-            return RotMGSpriteLoader.objecLoadPromise;
+            return RotMGSpriteLoader.preloadAll();
         }
 
         initializePages () {
