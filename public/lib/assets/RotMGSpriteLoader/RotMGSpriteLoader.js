@@ -1,9 +1,10 @@
 import { Page } from "./page.js";
+import { Constants } from "../../utils/constants.js";
 
 export const RotMGSpriteLoader = (function () {
     return class RotMGSpriteLoader {
         // static OBJECTS_JSON_URL = 'https://static.drips.pw/rotmg/production/current/json/Objects.json';
-        static OBJECTS_JSON_URL = 'http://localhost:5500/public/Objects.json';
+        static OBJECTS_JSON_URL = Constants.ORIGIN + '/Objects.json';
         static globalObjects = null;        
 
         constructor (pageSize) {

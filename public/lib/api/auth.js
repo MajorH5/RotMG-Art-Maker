@@ -1,7 +1,9 @@
+import { Constants } from "../utils/constants.js";
+
 export const Auth = (function () {
     return class Auth {
         static async signIn (email, password) {
-            const response = await fetch('http://localhost:8080/login', {
+            const response = await fetch(Constants.ORIGIN + '/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -16,7 +18,7 @@ export const Auth = (function () {
         }
 
         static async signOut (token) {
-            const response = await fetch('http://localhost:8080/logout', {
+            const response = await fetch(Constants.ORIGIN + '/logout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -30,7 +32,7 @@ export const Auth = (function () {
         }
 
         static async register (username, email, password) {
-            const response = await fetch('http://localhost:8080/register', {
+            const response = await fetch(Constants.ORIGIN + '/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
