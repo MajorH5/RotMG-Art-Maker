@@ -249,6 +249,8 @@ export const LoadScreen = (function () {
         }
 
         async loadPage (pageIndex) {
+            if (!this.spriteLoader.isLoaded()) await this.spriteLoader.waitLoad();
+            
             this.cells.clearChildren();
 
             const totalPages = this.currentSearchPage !== null ?

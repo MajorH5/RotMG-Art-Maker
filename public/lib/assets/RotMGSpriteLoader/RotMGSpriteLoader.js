@@ -5,7 +5,8 @@ export const RotMGSpriteLoader = (function () {
     return class RotMGSpriteLoader {
         // static OBJECTS_JSON_URL = 'https://static.drips.pw/rotmg/production/current/json/Objects.json';
         static OBJECTS_JSON_URL = Constants.ORIGIN + '/Objects.json';
-        static globalObjects = null;        
+        static globalObjects = null;
+        static objecLoadPromise = null;   
 
         constructor (pageSize) {
             this.pageSize = pageSize;
@@ -13,13 +14,29 @@ export const RotMGSpriteLoader = (function () {
         }
 
         static async preloadAll () {
-            const objectsJSON = await fetch(RotMGSpriteLoader.OBJECTS_JSON_URL)
-                .then((result) => result.json());
-            RotMGSpriteLoader.globalObjects = objectsJSON.Object.filter((object) => {
-                const texture = object.Texture || object.AnimatedTexture;
-                const notInvisible = texture && texture.File !== 'invisible';
-                return texture && notInvisible;
-            });
+            if (RotMGSpriteLoader.objecLoadPromise) return RotMGSpriteLoader.objecLoadPromise;
+            
+            const loadPromise = fetch(RotMGSpriteLoader.OBJECTS_JSON_URL)
+                .then((result) => result.json())
+                .then((objectsJSON) => {
+                    RotMGSpriteLoader.globalObjects = objectsJSON.Object.filter((object) => {
+                        const texture = object.Texture || object.AnimatedTexture;
+                        const notInvisible = texture && texture.File !== 'invisible';
+                        return texture && notInvisible;
+                    });
+                });
+            
+            RotMGSpriteLoader.objecLoadPromise = loadPromise;
+
+            return loadPromise;
+        }
+
+        isLoaded () {
+            return RotMGSpriteLoader.globalObjects !== null;
+        }
+
+        waitLoad () {
+            return RotMGSpriteLoader.objecLoadPromise;
         }
 
         initializePages () {
