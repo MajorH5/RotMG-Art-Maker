@@ -1,11 +1,15 @@
+import { Constants } from "../utils/constants.js";
 import { Vector2 } from "../utils/vector2.js";
 import { UIBase } from "./uiBase.js";
 
 export const UIText = (function () {
     return class UIText extends UIBase {
-        static FONT_MYRIADPRO_REGULAR = new FontFace('myriadpro', `url(/public/assets/fonts/myriadpro_regular.otf)`);
-        static FONT_MYRIADPRO_BOLD = new FontFace('myriadpro_bold', `url(/public/assets/fonts/myriadpro_bold.otf)`);
-        static FONT_MYRIADPRO_LIGHT = new FontFace('myriadpro_light', `url(/public/assets/fonts/myriadpro_light.otf)`);
+        static FONT_MYRIADPRO_REGULAR = new FontFace('myriadpro',
+            `url(${Constants.ORIGIN}/assets/fonts/myriadpro_regular.otf)`);
+        static FONT_MYRIADPRO_BOLD = new FontFace('myriadpro_bold',
+            `url(${Constants.ORIGIN}/assets/fonts/myriadpro_bold.otf)`);
+        static FONT_MYRIADPRO_LIGHT = new FontFace('myriadpro_light',
+            `url(${Constants.ORIGIN}/assets/fonts/myriadpro_light.otf)`);
 
         static DEFAULT_FONT = "myriadpro";
 
