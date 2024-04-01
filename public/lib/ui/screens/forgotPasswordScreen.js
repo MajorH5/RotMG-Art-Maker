@@ -20,7 +20,7 @@ export const ForgotPasswordScreen = (function () {
             });
 
             this.modal = new UIBase({
-                size: new Vector2(400, 380),
+                size: new Vector2(400, 260),
                 positionScale: new Vector2(0.5, 0.5),
                 pivot: new Vector2(0.5, 0.5),
                 
@@ -48,7 +48,7 @@ export const ForgotPasswordScreen = (function () {
             });
             this.border.parentTo(this.modal);
             
-            this.header = new UIText('Change your password', {
+            this.header = new UIText('Reset your password', {
                 backgroundEnabled: true,
                 backgroundColor: '#4D4D4D',
                 sizeScale: new Vector2(1, 0),
@@ -66,7 +66,7 @@ export const ForgotPasswordScreen = (function () {
             });
             this.header.parentTo(this.modal);
 
-            this.passwordLabel = new UIText('Password', {
+            this.emailLabel = new UIText('Email:', {
                 position: new Vector2(35, 70),
                 size: new Vector2(100, 20),
                 textXAlignment: 'left',
@@ -76,9 +76,9 @@ export const ForgotPasswordScreen = (function () {
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.passwordLabel.parentTo(this.modal);
+            this.emailLabel.parentTo(this.modal);
 
-            this.passwordEnter = new UITextBox('password', {
+            this.emailEnter = new UITextBox('example@domain.com', {
                 position: new Vector2(35, 105.5),
                 size: new Vector2(280, 30),
                 font: 'myriadpro',
@@ -93,77 +93,21 @@ export const ForgotPasswordScreen = (function () {
                 textXAlignment: 'left',
                 textBaseLine: 'middle',
             });
-            this.passwordEnter.onInput.listen((contents) => {
-                this.passwordEnter.displayText = contents.replace(/./g, '*');
-            });
-            this.passwordEnter.parentTo(this.modal);
+            this.emailEnter.parentTo(this.modal);
 
-            this.newPasswordLabel = new UIText('New Password', {
+            this.notice = new UIText('Reset link will be sent to the email', {
                 position: new Vector2(35, 150),
-                size: new Vector2(200, 20),
+                size: new Vector2(330, 15),
                 textXAlignment: 'left',
-                fontSize: 17,
-                font: 'myriadpro_bold',
-                fontColor: '#bbbbbb',
+                fontSize: 14,
+                fontColor: '#B3B3B3',
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.newPasswordLabel.parentTo(this.modal);
-            
-            this.newPasswordEnter = new UITextBox('password', {
-                position: new Vector2(35, 185.5),
-                size: new Vector2(280, 30),
-                font: 'myriadpro',
-                
-                fontColor: '#bbbbbb',
-                borderColor: '#4f4f4f',
-                placeholderColor: 'gray',
+            this.notice.parentTo(this.modal);
 
-                borderSize: 3,
-                paddingLeft: 5,
-                
-                textXAlignment: 'left',
-                textBaseLine: 'middle',
-            });
-            this.newPasswordEnter.onInput.listen((contents) => {
-                this.newPasswordEnter.displayText = contents.replace(/./g, '*');
-            });
-            this.newPasswordEnter.parentTo(this.modal);
-
-            this.retypeLabel = new UIText('Retype New Password:', {
-                position: new Vector2(35, 230),
-                size: new Vector2(200, 20),
-                textXAlignment: 'left',
-                fontSize: 17,
-                font: 'myriadpro_bold',
-                fontColor: '#bbbbbb',
-                shadow: true,
-                shadowBlur: 3,
-            });
-            this.retypeLabel.parentTo(this.modal);
-
-            this.retypeEnter = new UITextBox('password', {
-                position: new Vector2(35, 265.5),
-                size: new Vector2(280, 30),
-                font: 'myriadpro',
-
-                fontColor: '#bbbbbb',
-                borderColor: '#4f4f4f',
-                placeholderColor: 'gray',
-
-                borderSize: 3,
-                paddingLeft: 5,
-                
-                textXAlignment: 'left',
-                textBaseLine: 'middle',
-            });
-            this.retypeEnter.onInput.listen((contents) => {
-                this.retypeEnter.displayText = contents.replace(/./g, '*');
-            });
-            this.retypeEnter.parentTo(this.modal);
-
-            this.incorrect = new UIText('Incorrect Password', {
-                position: new Vector2(35, 300),
+            this.incorrect = new UIText('Error', {
+                position: new Vector2(35, 170),
                 size: new Vector2(330, 30),
                 textXAlignment: 'left',
                 fontSize: 14,
@@ -193,28 +137,12 @@ export const ForgotPasswordScreen = (function () {
             let isResetting = false;
 
             this.submit.mouseUp.listen(async () => {
-                const password = this.passwordEnter.text;
-                const newPassword = this.newPasswordEnter.text;
-                const retypePassword = this.retypeEnter.text;
+                const email = this.emailEnter.text;
+                
+                let result = Auth.validateEmail(email);
 
-                let result = [
-                    Auth.validatePassword(password),
-                    Auth.validatePassword(newPassword),
-                ];
-                if (result.some((error) => error !== true)){
-                    const index = result.findIndex((error) => error !== true);
-                    let error = result[index];
-
-                    if (index > 0) {
-                        error = error.replace('password', 'new password').replace('Password', 'New Password');
-                    }
-
-                    this.incorrect.text = error;
-                    this.incorrect.visible = true;
-                    Sounds.playSfx(Sounds.SND_ERROR);
-                    return;
-                } else if (newPassword !== retypePassword) {
-                    this.incorrect.text = 'New passwords do not match';
+                if (result !== true) {
+                    this.incorrect.text = result;
                     this.incorrect.visible = true;
                     Sounds.playSfx(Sounds.SND_ERROR);
                     return;
@@ -226,17 +154,11 @@ export const ForgotPasswordScreen = (function () {
                 isResetting = true;
 
                 this.incorrect.visible = false;
-                const response = await Auth.changePassword(ArtEditor.user.token, password, newPassword);
-
-                if (response.error === undefined) {
-                    this.visible = false;
-                    this.closed.trigger();
-                    this.clearInputs();
-                } else {
-                    this.incorrect.text = response.error;
-                    this.incorrect.visible = true;
-                    Sounds.playSfx(Sounds.SND_ERROR);
-                }
+                const response = await Auth.resetPassword(email);
+                
+                this.incorrect.text = response.error || response.message || '';
+                this.incorrect.visible = true;
+                this.submit.visible = response.error !== undefined;
 
                 isResetting = false;
             });
@@ -259,6 +181,7 @@ export const ForgotPasswordScreen = (function () {
             this.cancel.mouseUp.listen(() => {
                 isResetting = false;
                 this.visible = false;
+                this.submit.visible = true;
                 this.clearInputs();
                 this.closed.trigger();
             });
@@ -268,12 +191,7 @@ export const ForgotPasswordScreen = (function () {
 
         clearInputs () {
             this.incorrect.visible = false;
-            this.passwordEnter.text = '';
-            this.passwordEnter.displayText = '';
-            this.newPasswordEnter.text = '';
-            this.newPasswordEnter.displayText = '';
-            this.retypeEnter.text = '';
-            this.retypeEnter.displayText = '';
+            this.emailEnter.text = '';
         }
         
         bindHover (object, hoverColor, defaultColor = '#ffffff') {

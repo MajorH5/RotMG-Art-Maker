@@ -4,22 +4,23 @@ import { UIBase } from "../uiBase.js";
 import { UIText } from "../uiText.js";
 import { Sounds } from "../../assets/sounds.js";
 import { Auth } from "../../api/auth.js";
+import { Event } from "../../utils/event.js";
 
-export const SignUpScreen = (function () {
-    return class SignUpScreen extends UIBase {
+export const ChangePasswordScreen = (function () {
+    return class ChangePasswordScreen extends UIBase {
         constructor (options) {
             super({
                 backgroundColor: '#000000',
                 backgroundEnabled: true,
                 sizeScale: Vector2.one,
-                zIndex: 9999,
+                zIndex: 99999,
                 
                 visible: false,
                 ...options
             });
 
             this.modal = new UIBase({
-                size: new Vector2(400, 550),
+                size: new Vector2(400, 380),
                 positionScale: new Vector2(0.5, 0.5),
                 pivot: new Vector2(0.5, 0.5),
                 
@@ -46,8 +47,8 @@ export const SignUpScreen = (function () {
                 borderRadius: 6,
             });
             this.border.parentTo(this.modal);
-
-            this.header = new UIText('Register in order to save your progress', {
+            
+            this.header = new UIText('Change your password', {
                 backgroundEnabled: true,
                 backgroundColor: '#4D4D4D',
                 sizeScale: new Vector2(1, 0),
@@ -65,7 +66,7 @@ export const SignUpScreen = (function () {
             });
             this.header.parentTo(this.modal);
 
-            this.nameLabel = new UIText('Username:', {
+            this.passwordLabel = new UIText('Password:', {
                 position: new Vector2(35, 70),
                 size: new Vector2(100, 20),
                 textXAlignment: 'left',
@@ -75,9 +76,9 @@ export const SignUpScreen = (function () {
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.nameLabel.parentTo(this.modal);
+            this.passwordLabel.parentTo(this.modal);
 
-            this.usernameEnter = new UITextBox('username', {
+            this.passwordEnter = new UITextBox('password', {
                 position: new Vector2(35, 105.5),
                 size: new Vector2(280, 30),
                 font: 'myriadpro',
@@ -85,18 +86,21 @@ export const SignUpScreen = (function () {
                 fontColor: '#bbbbbb',
                 borderColor: '#4f4f4f',
                 placeholderColor: 'gray',
-
+                
                 borderSize: 3,
                 paddingLeft: 5,
 
                 textXAlignment: 'left',
                 textBaseLine: 'middle',
             });
-            this.usernameEnter.parentTo(this.modal);
+            this.passwordEnter.onInput.listen((contents) => {
+                this.passwordEnter.displayText = contents.replace(/./g, '*');
+            });
+            this.passwordEnter.parentTo(this.modal);
 
-            this.emailLabel = new UIText('Email:', {
+            this.newPasswordLabel = new UIText('New Password:', {
                 position: new Vector2(35, 150),
-                size: new Vector2(100, 20),
+                size: new Vector2(200, 20),
                 textXAlignment: 'left',
                 fontSize: 17,
                 font: 'myriadpro_bold',
@@ -104,9 +108,9 @@ export const SignUpScreen = (function () {
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.emailLabel.parentTo(this.modal);
+            this.newPasswordLabel.parentTo(this.modal);
             
-            this.emailEnter = new UITextBox('example@domain.com', {
+            this.newPasswordEnter = new UITextBox('password', {
                 position: new Vector2(35, 185.5),
                 size: new Vector2(280, 30),
                 font: 'myriadpro',
@@ -121,11 +125,14 @@ export const SignUpScreen = (function () {
                 textXAlignment: 'left',
                 textBaseLine: 'middle',
             });
-            this.emailEnter.parentTo(this.modal);
+            this.newPasswordEnter.onInput.listen((contents) => {
+                this.newPasswordEnter.displayText = contents.replace(/./g, '*');
+            });
+            this.newPasswordEnter.parentTo(this.modal);
 
-            this.passwordLabel = new UIText('Password:', {
+            this.retypeLabel = new UIText('Retype New Password:', {
                 position: new Vector2(35, 230),
-                size: new Vector2(100, 20),
+                size: new Vector2(200, 20),
                 textXAlignment: 'left',
                 fontSize: 17,
                 font: 'myriadpro_bold',
@@ -133,9 +140,9 @@ export const SignUpScreen = (function () {
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.passwordLabel.parentTo(this.modal);
+            this.retypeLabel.parentTo(this.modal);
 
-            this.passwordEnter = new UITextBox('password', {
+            this.retypeEnter = new UITextBox('password', {
                 position: new Vector2(35, 265.5),
                 size: new Vector2(280, 30),
                 font: 'myriadpro',
@@ -150,45 +157,13 @@ export const SignUpScreen = (function () {
                 textXAlignment: 'left',
                 textBaseLine: 'middle',
             });
-            this.passwordEnter.onInput.listen((contents) => {
-                this.passwordEnter.displayText = contents.replace(/./g, '*');
-            });
-            this.passwordEnter.parentTo(this.modal);
-
-            this.retypeLabel = new UIText('Retype Password:', {
-                position: new Vector2(35, 310),
-                size: new Vector2(150, 20),
-                textXAlignment: 'left',
-                fontSize: 17,
-                font: 'myriadpro_bold',
-                fontColor: '#bbbbbb',
-                shadow: true,
-                shadowBlur: 3,
-            });
-            this.retypeLabel.parentTo(this.modal);
-
-            this.retypeEnter = new UITextBox('password', {
-                position: new Vector2(35, 345.5),
-                size: new Vector2(280, 30),
-                font: 'myriadpro',
-
-                fontColor: '#bbbbbb',
-                borderColor: '#4f4f4f',
-                placeholderColor: 'gray',
-
-                borderSize: 3,
-                paddingLeft: 5,
-
-                textXAlignment: 'left',
-                textBaseLine: 'middle',
-            });
             this.retypeEnter.onInput.listen((contents) => {
                 this.retypeEnter.displayText = contents.replace(/./g, '*');
             });
             this.retypeEnter.parentTo(this.modal);
 
             this.incorrect = new UIText('Incorrect Password', {
-                position: new Vector2(35, 380),
+                position: new Vector2(35, 300),
                 size: new Vector2(330, 30),
                 textXAlignment: 'left',
                 fontSize: 14,
@@ -199,32 +174,8 @@ export const SignUpScreen = (function () {
                 visible: false
             });
             this.incorrect.parentTo(this.modal);
-            
 
-            this.already = new UIText('Already registered? Click here to sign in!', {
-                position:  new Vector2(35, 410),
-                size: new Vector2(330, 15),
-                textXAlignment: 'left',
-                fontSize: 14,
-                fontColor: '#B3B3B3',
-                shadow: true,
-                shadowBlur: 3,
-            });
-            this.bindHover(this.already, '#ffda84', '#B3B3B3');
-            this.already.parentTo(this.modal);
-
-            this.notice = new UIText('By clicking \'Register\', you are indicating that you have read and agreed to the Terms of Use and Privacy Policy', {
-                position: new Vector2(35, 455),
-                size: new Vector2(330, 15),
-                textXAlignment: 'left',
-                fontSize: 14,
-                fontColor: '#B3B3B3',
-                shadow: true,
-                shadowBlur: 3,
-            });
-            this.notice.parentTo(this.modal);
-
-            this.register = new UIText('Register', {
+            this.submit = new UIText('Submit', {
                 positionScale: new Vector2(1, 1),
                 position: new Vector2(-20, -20),
                 pivot: new Vector2(1, 1),
@@ -236,53 +187,58 @@ export const SignUpScreen = (function () {
                 fontSize: 24,
                 fontColor: '#ffffff'
             });
-            this.bindHover(this.register, '#ffda84');
-            this.register.parentTo(this.modal);
+            this.bindHover(this.submit, '#ffda84');
+            this.submit.parentTo(this.modal);
 
-            let isRegistering = false;
+            let isResetting = false;
 
-            this.register.mouseUp.listen(async () => {
+            this.submit.mouseUp.listen(async () => {
                 const password = this.passwordEnter.text;
+                const newPassword = this.newPasswordEnter.text;
                 const retypePassword = this.retypeEnter.text;
-                const email = this.emailEnter.text;
-                const username = this.usernameEnter.text;
 
                 let result = [
-                    Auth.validateUsername(username),
-                    Auth.validateEmail(email),
                     Auth.validatePassword(password),
+                    Auth.validatePassword(newPassword),
                 ];
-                result = result.filter((error) => error !== true);
+                if (result.some((error) => error !== true)){
+                    const index = result.findIndex((error) => error !== true);
+                    let error = result[index];
 
-                if (result.length > 0) {
-                    this.incorrect.text = result[0];
+                    if (index > 0) {
+                        error = error.replace('password', 'new password').replace('Password', 'New Password');
+                    }
+
+                    this.incorrect.text = error;
                     this.incorrect.visible = true;
                     Sounds.playSfx(Sounds.SND_ERROR);
                     return;
-                } else if (password !== retypePassword) {
-                    this.incorrect.text = 'Passwords do not match';
+                } else if (newPassword !== retypePassword) {
+                    this.incorrect.text = 'New passwords do not match';
                     this.incorrect.visible = true;
                     Sounds.playSfx(Sounds.SND_ERROR);
                     return;
-                } else if (isRegistering) {
+                } else if (isResetting) {
                     Sounds.playSfx(Sounds.SND_ERROR);
                     return;
                 }
 
-                isRegistering = true;
+                isResetting = true;
 
                 this.incorrect.visible = false;
-                const response = await ArtEditor.register(username, email, password);
+                const response = await Auth.changePassword(ArtEditor.user.token, password, newPassword);
 
                 if (response.error === undefined) {
                     this.visible = false;
+                    this.closed.trigger();
                     this.clearInputs();
                 } else {
                     this.incorrect.text = response.error;
                     this.incorrect.visible = true;
+                    Sounds.playSfx(Sounds.SND_ERROR);
                 }
 
-                isRegistering = false;
+                isResetting = false;
             });
             
             this.cancel = new UIText('Cancel', {
@@ -301,18 +257,21 @@ export const SignUpScreen = (function () {
             this.cancel.parentTo(this.modal);
 
             this.cancel.mouseUp.listen(() => {
-                isRegistering = false;
+                isResetting = false;
                 this.visible = false;
                 this.clearInputs();
+                this.closed.trigger();
             });
+
+            this.closed = new Event();
         }
 
         clearInputs () {
             this.incorrect.visible = false;
-            this.emailEnter.text = '';
             this.passwordEnter.text = '';
             this.passwordEnter.displayText = '';
-            this.usernameEnter.text = '';
+            this.newPasswordEnter.text = '';
+            this.newPasswordEnter.displayText = '';
             this.retypeEnter.text = '';
             this.retypeEnter.displayText = '';
         }

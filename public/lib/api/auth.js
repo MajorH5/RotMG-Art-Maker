@@ -15,8 +15,8 @@ export const Auth = (function () {
             return API.post('/register', { username, email, password });
         }
 
-        static async resetPassword (token) {
-            return API.post('/reset-password', { token });
+        static async resetPassword (email) {
+            return API.post('/reset-password', { email });
         }
 
         static async changePassword (token, currentPassword, newPassword) {
@@ -25,6 +25,10 @@ export const Auth = (function () {
 
         static async resendVerificationEmail (token) {
             return API.post('/resend-verification', { token });
+        }
+
+        static async me (token) {
+            return API.post('/me', { token });
         }
 
         static setCookie (name, value, days) {

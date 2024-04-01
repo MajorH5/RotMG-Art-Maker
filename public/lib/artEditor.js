@@ -127,10 +127,15 @@ export const ArtEditor = (function () {
                 const jwt = Auth.getCookie('jwt');
     
                 if (jwt !== null) {
-                    const user = Auth.decodeUser(jwt);
-    
-                    this.user = user;
-                    this.editorScreen.onUserLogin(user);
+                    const decoded = Auth.decodeUser(jwt);
+                    const user = await Auth.me(decoded.token);
+
+                    if (user.error === undefined) {
+                        this.user = user;
+                        this.editorScreen.onUserLogin(user);
+                    } else {
+                        Auth.eraseCookie('jwt');
+                    }
                 }
             } catch (error) {
                 console.error('Error decoding user from jwt:', error);
@@ -150,6 +155,21 @@ export const ArtEditor = (function () {
                 }
             } catch (error) {
                 localStorage.setItem('mute', 'false');
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const temporarySigninToken = urlParams.get('tst');
+
+            if (temporarySigninToken !== null) {
+                const user = await Auth.me(temporarySigninToken);
+
+                if (user.error === undefined) {
+                    this.user = user;
+                    Auth.setCookie('jwt', Auth.encodeUser(user), 1);
+                    this.editorScreen.onUserLogin(user);
+                    this.editorScreen.currentAccountScreen.visible = false;
+                    this.editorScreen.changePasswordScreen.visible = true;
+                }
             }
 
             this.initialized = true;

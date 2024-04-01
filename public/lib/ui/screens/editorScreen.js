@@ -18,6 +18,7 @@ import { PackagedSequence } from '../../utils/packagedSequence.js';
 import { SignInScreen } from './signinScreen.js';
 import { SignUpScreen } from './signupScreen.js';
 import { CurrentAccountScreen } from './currentAccountScreen.js';
+import { ChangePasswordScreen } from './changePasswordScreen.js';
 import { ForgotPasswordScreen } from './forgotPasswordScreen.js';
 
 export const EditorScreen = (function () {
@@ -229,10 +230,16 @@ export const EditorScreen = (function () {
             this.currentAccountScreen = new CurrentAccountScreen();
             this.currentAccountScreen.parentTo(this);
 
+            this.changePasswordScreen = new ChangePasswordScreen();
+            this.changePasswordScreen.closed.listen(() => {
+                this.currentAccountScreen.visible = true;
+            });
+            this.changePasswordScreen.parentTo(this);
+
             this.forgotPasswordScreen = new ForgotPasswordScreen();
             this.forgotPasswordScreen.closed.listen(() => {
-                this.currentAccountScreen.visible = true;
-            })
+                this.signInScreen.visible = true;
+            });
             this.forgotPasswordScreen.parentTo(this);
 
             this.currentSize = new Vector2(8, 8);
@@ -240,8 +247,13 @@ export const EditorScreen = (function () {
             this.spriteEditor.setActiveColor(this.colorEditor.getActiveColor());
 
             this.currentAccountScreen.changePassword.mouseUp.listen(() => {
-                this.forgotPasswordScreen.visible = true;
+                this.changePasswordScreen.visible = true;
                 this.currentAccountScreen.visible = false;
+            });
+
+            this.signInScreen.forgot.mouseUp.listen(() => {
+                this.forgotPasswordScreen.visible = true;
+                this.signInScreen.visible = false;
             });
 
             this.loginOut.mouseUp.listen(() => {
@@ -316,7 +328,7 @@ export const EditorScreen = (function () {
         isModalOpen () {
             return this.loadScreen.visible || this.saveScreen.visible
                 || this.signInScreen.visible || this.signUpScreen.visible
-                || this.currentAccountScreen.visible || this.forgotPasswordScreen.visible;
+                || this.currentAccountScreen.visible || this.changePasswordScreen.visible;
         }
 
         setSequence (sequence) {
