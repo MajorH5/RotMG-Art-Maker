@@ -30,6 +30,22 @@ body {
     background-color: black;
     color: white;
     line-height: 1.6;
+    overflow: hidden;
+}
+
+footer {
+    background-color: #1d1d1d;
+    padding: 10px;
+    text-align: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+footer a {
+    text-decoration: none;
+    color: #9b9b9b;
 }
 
 .copyright {

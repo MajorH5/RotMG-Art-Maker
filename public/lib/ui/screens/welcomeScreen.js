@@ -4,6 +4,7 @@ import { Vector2 } from "../../utils/vector2.js";
 import { Sounds } from '../../assets/sounds.js';
 import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
+import { Constants } from "../../utils/constants.js";
 
 export const WelcomeScreen = (function () {
     return class WelcomeScreen extends UIBase {
@@ -18,7 +19,7 @@ export const WelcomeScreen = (function () {
             });
 
             this.modal = new UIBase({
-                size: new Vector2(400, 145),
+                size: new Vector2(400, 220),
                 positionScale: new Vector2(0.5, 0.5),
                 pivot: new Vector2(0.5, 0.5),
 
@@ -50,7 +51,7 @@ export const WelcomeScreen = (function () {
             });
             this.header.parentTo(this.modal);
 
-            this.welcomeText = new UIText('Welcome to RotMG Art Editor. Click here to view source or report issues.', {
+            this.welcomeText = new UIText('Welcome to RotMG Art Editor. By clicking \'Enter\', you are indicating that you have read and agreed to the Terms of Use and Privacy Policy.', {
                 positionScale: new Vector2(0, 0.1),
                 sizeScale: new Vector2(1, 0.7),
 
@@ -60,11 +61,42 @@ export const WelcomeScreen = (function () {
                 fontColor: '#bbbbbb',
                 fontSize: 18,
                 font: 'myriadpro_light',
+                paddingRight: 20,
 
                 shadow: true,
                 shadowBlur: 5,
             });
             this.welcomeText.parentTo(this.modal);
+
+            this.tos = new UIText('Terms of Use', {
+                positionScale: new Vector2(0.5, 0),
+                size: new Vector2(100, 20),
+                pivot: new Vector2(1, 0),
+                position: new Vector2(-10, 140),
+                clickable: true,
+                shadow: true,
+                shadowBlur: 7,
+                fontColor: '#5d56bd',
+            });
+            this.tos.mouseUp.listen(() => {
+                window.open(`${Constants.ORIGIN}/terms_of_use.html`, '_blank');
+            });
+            this.tos.parentTo(this.modal);
+
+            this.pp = new UIText('Privacy Policy', {
+                positionScale: new Vector2(0.5, 0),
+                size: new Vector2(100, 20),
+                pivot: new Vector2(0, 0),
+                position: new Vector2(10, 140),
+                clickable: true,
+                shadow: true,
+                shadowBlur: 7,
+                fontColor: '#5d56bd',
+            });
+            this.pp.mouseUp.listen(() => {
+                window.open(`${Constants.ORIGIN}/privacy_policy.html`, '_blank');
+            });
+            this.pp.parentTo(this.modal);
 
             this.enter = new RotmgButtonDefault('Enter', {
                 positionScale: new Vector2(0.5, 1),
@@ -75,7 +107,7 @@ export const WelcomeScreen = (function () {
 
             this.enter.mouseUp.listen(() => {
                 this.visible = false;
-                ArtEditor.legalScreen.visible = true;
+                Sounds.playTheme(Sounds.SND_THEME);
             });
         }
     }
