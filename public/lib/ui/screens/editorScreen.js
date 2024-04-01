@@ -281,7 +281,7 @@ export const EditorScreen = (function () {
                 this.currentAccountScreen.visible = false;
                 this.currentAccountScreen.incorrect.visible = false;
                 this.currentAccountScreen.sent.visible = false;
-                this.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.verified;
+                this.currentAccountScreen.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.details.verified;
             });
 
             this.versionText = new UIText('v1.0.0', {
