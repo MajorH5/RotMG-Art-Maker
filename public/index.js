@@ -16,14 +16,12 @@ var global = global || (() => {
     
     const artEditor = new ArtEditor(canvas, context);
 
-    if (Constants.DEV_ENVIRONMENT) {
-        Object.defineProperty(global, 'ArtEditor', {
-            value: artEditor,
-            writable: false,
-            enumerable: false,
-            configurable: false
-        });
-    }
+    Object.defineProperty(global, 'ArtEditor', {
+        value: artEditor,
+        writable: false,
+        enumerable: false,
+        configurable: false
+    });
     
     await artEditor.initialize();
     artEditor.globalStart();
