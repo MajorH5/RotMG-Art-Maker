@@ -177,20 +177,28 @@ export const ArtEditor = (function () {
         }
 
         async preloadAll () {
-            this.preloadScreen.visible = true;
-
             await Sounds.preloadAll((amount, total) => {
-                this.preloadScreen.text = `Loading Sounds... ${Math.floor(amount / total * 100)}%`;
+                this.writePreloadText(`Loading Sounds... ${Math.floor(amount / total * 100)}%`);
             });
 
             await Sprite.preloadAll((amount, total) => {
-                this.preloadScreen.text = `Loading Sprites... ${Math.floor(amount / total * 100)}%`;
+                this.writePreloadText(`Loading Sprites... ${Math.floor(amount / total * 100)}%`);
             });
 
-            this.preloadScreen.text = `Loading Assets...`;
+            this.writePreloadText('Loading Assets...');
             await RotMGSpriteLoader.preloadAll();
 
             this.preloadScreen.visible = false;
+        }
+
+        writePreloadText (text) {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.context.textAlign = 'center';
+            this.context.textBaseline = 'middle';
+            this.context.font = '16px myriadpro';
+            this.context.fillStyle = '#ffffff';
+            this.context.fillText(text, this.canvas.width / 2, this.canvas.height / 2);
+            this.context.textBaseline = 'alphabetic';
         }
 
         globalStart () {

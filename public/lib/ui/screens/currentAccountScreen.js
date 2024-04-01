@@ -109,10 +109,11 @@ export const CurrentAccountScreen = (function () {
                 
                 Auth.resendVerificationEmail(ArtEditor.user.token).then((result) => {
                     if (result.error === 'User is already verified') {
-                        ArtEditor.user.verified = true;
+                        ArtEditor.user.details.verified = true;
                         Auth.setCookie('jwt', Auth.encodeUser(ArtEditor.user), 1);
                         this.notVerified.visible = false;
-                        this.incorrect.visible = false;
+                        this.incorrect.visible = true;
+                        this.incorrect.text = 'Your are already verified';
                         return;
                     }
 
@@ -198,8 +199,8 @@ export const CurrentAccountScreen = (function () {
 
             this.continue.mouseUp.listen(async () => {
                 this.visible = false;
-                this.incorrect.visible = false;
                 this.sent.visible = false;
+                this.incorxrect.visible = false;
                 this.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.details.verified;
             });
         }

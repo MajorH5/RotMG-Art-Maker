@@ -7,7 +7,7 @@ export const PreloadScreen = (function () {
             super('', {
                 sizeScale: new Vector2(1, 1),
                 backgroundEnabled: true,
-                backgroundColor: '#000000',
+                backgroundColor: '#eeeeee',
                 zIndex: 99999999,
                 fontColor: '#ffffff',
                 ...options
