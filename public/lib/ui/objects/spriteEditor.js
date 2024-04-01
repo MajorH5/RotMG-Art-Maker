@@ -157,6 +157,18 @@ export const SpriteEditor = (function () {
             if (this.frame !== null) {
                 this.frame.clear();
             }
+
+            // store the clear action in the history
+            for (let y = 0; y < this.spriteSize.y; y++) {
+                for (let x = 0; x < this.spriteSize.x; x++) {
+                    const pixel = this.pixels[y][x];
+                    this.history.update(SpriteEditor.HISTORY_PIXEL_EDIT, {
+                        from: pixel.getAttribute('color'),
+                        to: null,
+                        pixel: pixel
+                    });
+                }
+            }
         }
 
         createPixel (x, y) {
@@ -196,18 +208,18 @@ export const SpriteEditor = (function () {
                 this.onInteract.trigger(SpriteEditor.HOVER, pixel);
             });
 
-            pixel.mouseUp.listen(() => {
-                if (this.history !== null) {
-                    const pending = this.history.getPendingAction();
-
-                    if (pending !== null && pending.getTag() === SpriteEditor.HISTORY_PIXEL_EDIT) {
-                        this.history.close();
-                    }
-                }
-            })
-
-            pixel.mouseDown.listen(() => {
+            pixel.mouseDown.listen((position, mouse) => {
                 this.handlePixelInteract(pixel);
+
+                mouse.mouseUp.listenOnce(() => {
+                    if (this.history !== null) {
+                        const pending = this.history.getPendingAction();
+    
+                        if (pending !== null && pending.getTag() === SpriteEditor.HISTORY_PIXEL_EDIT) {
+                            this.history.close();
+                        }
+                    }
+                })
             });
             
             pixel.mouseMove.listen((position, mouse) => {
@@ -315,6 +327,31 @@ export const SpriteEditor = (function () {
                     pixels[index + 1] = g;
                     pixels[index + 2] = b;
                     pixels[index + 3] = a;
+                }
+            }
+
+            return [pixels, this.spriteSize.x, this.spriteSize.y];
+        }
+
+        getCompressedPixels () {
+            const pixels = [];
+
+            for (let y = 0; y < this.spriteSize.y; y++) {
+                for (let x = 0; x < this.spriteSize.x; x++) {
+                    const pixel = this.pixels[y][x];
+                    let color = pixel.getAttribute('color');
+
+                    if (!pixel.backgroundEnabled || color === null) {
+                        color = -1;
+                    } else {
+                        const [r, g, b] = this.hexToRGB(color);
+                        const packed = (r << 16) | (g << 8) | b;
+
+                        color = packed;
+                    }
+
+
+                    pixels.push(color);
                 }
             }
 

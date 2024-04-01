@@ -1,50 +1,30 @@
 import { Constants } from "../utils/constants.js";
+import { API } from "./api.js";
 
 export const Auth = (function () {
     return class Auth {
         static async signIn (email, password) {
-            const response = await fetch(Constants.ORIGIN + '/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            });
-
-            return response.json();
+            return API.post('/login', { email, password });
         }
 
         static async signOut (token) {
-            const response = await fetch(Constants.ORIGIN + '/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    token
-                })
-            });
-
-            return response.json();
+            return API.post('/logout', { token });
         }
 
         static async register (username, email, password) {
-            const response = await fetch(Constants.ORIGIN + '/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username,
-                    email,
-                    password
-                })
-            });
+            return API.post('/register', { username, email, password });
+        }
 
-            return response.json();
+        static async resetPassword (token) {
+            return API.post('/reset-password', { token });
+        }
+
+        static async changePassword (token, currentPassword, newPassword) {
+            return API.post('/change-password', { token, currentPassword, newPassword });
+        }
+
+        static async resendVerificationEmail (token) {
+            return API.post('/resend-verification', { token });
         }
 
         static setCookie (name, value, days) {
@@ -83,11 +63,13 @@ export const Auth = (function () {
         static validatePassword (password) {
             const MIN_PASSWORD_LENGTH = 8;
             const MAX_PASSWORD_LENGTH = 64;
+            const ALLOWED_PASSWORD_CHARACTERS = /^[a-zA-Z0-9!@#$%^&*()\-_+=~]*$/;
 
             if (typeof password !== 'string') return 'Password must be a string';
             if (password.length === 0) return 'Please enter a password';
             if (password.length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH) return `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters long`;
-    
+            if (!ALLOWED_PASSWORD_CHARACTERS.test(password)) return 'Password can only contain letters, numbers, and special characters (!@#$%^&*()-_+=~)';
+
             return true;
         }
 

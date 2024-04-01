@@ -1,0 +1,13 @@
+User-agent: *
+
+Disallow: /verify
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /create-post
+Disallow: /delete-post
+Disallow: /get-posts
+Disallow: /resend-verification
+Disallow: /change-password

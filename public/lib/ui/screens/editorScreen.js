@@ -18,6 +18,7 @@ import { PackagedSequence } from '../../utils/packagedSequence.js';
 import { SignInScreen } from './signinScreen.js';
 import { SignUpScreen } from './signupScreen.js';
 import { CurrentAccountScreen } from './currentAccountScreen.js';
+import { ForgotPasswordScreen } from './forgotPasswordScreen.js';
 
 export const EditorScreen = (function () {
     return class EditorScreen extends UIBase {
@@ -228,9 +229,20 @@ export const EditorScreen = (function () {
             this.currentAccountScreen = new CurrentAccountScreen();
             this.currentAccountScreen.parentTo(this);
 
+            this.forgotPasswordScreen = new ForgotPasswordScreen();
+            this.forgotPasswordScreen.closed.listen(() => {
+                this.currentAccountScreen.visible = true;
+            })
+            this.forgotPasswordScreen.parentTo(this);
+
             this.currentSize = new Vector2(8, 8);
             this.sequence = null;
             this.spriteEditor.setActiveColor(this.colorEditor.getActiveColor());
+
+            this.currentAccountScreen.changePassword.mouseUp.listen(() => {
+                this.forgotPasswordScreen.visible = true;
+                this.currentAccountScreen.visible = false;
+            });
 
             this.loginOut.mouseUp.listen(() => {
                 if (!this.isModalOpen()) {
@@ -267,6 +279,9 @@ export const EditorScreen = (function () {
             this.currentAccountScreen.notYou.mouseUp.listen(async () => {
                 await ArtEditor.logout();
                 this.currentAccountScreen.visible = false;
+                this.currentAccountScreen.incorrect.visible = false;
+                this.currentAccountScreen.sent.visible = false;
+                this.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.verified;
             });
 
             this.versionText = new UIText('v1.0.0', {
@@ -301,7 +316,7 @@ export const EditorScreen = (function () {
         isModalOpen () {
             return this.loadScreen.visible || this.saveScreen.visible
                 || this.signInScreen.visible || this.signUpScreen.visible
-                || this.currentAccountScreen.visible;
+                || this.currentAccountScreen.visible || this.forgotPasswordScreen.visible;
         }
 
         setSequence (sequence) {
@@ -316,6 +331,22 @@ export const EditorScreen = (function () {
 
             this.setCurrentFrame(PackagedSequence.STAND);
             this.spritePreview.setSequence(sequence);
+        }
+
+        exportImage () {
+            if (this.sequence !== null) {
+                return this.sequence.toJSON();
+            }
+
+            const [pixels, width, height] = this.spriteEditor.getCompressedPixels();
+
+            return {
+                pixels: Array.from(pixels),
+                size: {
+                    x: width,
+                    y: height
+                }
+            };
         }
 
         onUserLogin (user) {
@@ -426,6 +457,8 @@ export const EditorScreen = (function () {
                 } else {
                     this.setSequence(new PackagedSequence(size));
                 }
+
+                this.history.clear();
             });
 
             this.modeDropdown.onChoice.listen((choice) => {
@@ -444,6 +477,8 @@ export const EditorScreen = (function () {
                         this.setSequence(null);
                         break;
                 }
+
+                this.history.clear();
             });
 
             this.loadScreen.onSelect.listen((isAnimatedTexture, size, objectData) => {                
@@ -459,6 +494,8 @@ export const EditorScreen = (function () {
                     this.sizeDropdown.setCurrentChoice(`${size.x} x ${size.y}`);
                     this.refreshPreview();
                 }
+
+                this.history.clear();
             });
         }
     }

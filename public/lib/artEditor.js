@@ -236,12 +236,10 @@ export const ArtEditor = (function () {
             }
 
             const result = await Auth.signOut(this.user.token);
-
-            if (result.error === undefined || result.error === 'Token has expired') {
-                this.user = null;
-                Auth.eraseCookie('jwt');
-                this.editorScreen.onUserLogout();
-            }
+            
+            this.editorScreen.onUserLogout();
+            this.user = null;
+            Auth.eraseCookie('jwt');
 
             return result;
         }

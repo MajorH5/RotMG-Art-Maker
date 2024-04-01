@@ -5,6 +5,7 @@ import { RotmgButtonBorder } from "../objects/rotmgButtonBorder.js";
 import { UIDropdownMenu } from "../uiDropdownMenu.js";
 import { Vector2 } from "../../utils/vector2.js";
 import { UITextBox } from "../uiTextBox.js";
+import { Posts } from "../../api/posts.js";
 import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
 
@@ -102,8 +103,11 @@ export const SaveScreen = (function () {
                 position: new Vector2(115.5, 110.5),
                 size: new Vector2(280, 30),
 
-                choices: ['Item'],
-                defaultChoice: 'Item'
+                choices: ['Items', 'Entities', 'Tiles', 'Objects', 'Misc'],
+                defaultChoice: 'Items'
+            });
+            this.typeDropdown.onChoice.listen(() => {
+                this.tagsEnter.blur();
             });
             this.typeDropdown.parentTo(this.modal);
 
@@ -148,7 +152,7 @@ export const SaveScreen = (function () {
                 position: new Vector2(-20, -20),
             });
             this.saveButton.mouseUp.listen(() => {
-                this.visible = false;
+                this.saveCreation();
             });
             this.saveButton.parentTo(this.modal);
 
@@ -160,8 +164,73 @@ export const SaveScreen = (function () {
             });
             this.cancelButton.mouseUp.listen(() => {
                 this.visible = false;
+                this.isSubmitting = false;
+                this.clearInputs();
             });
             this.cancelButton.parentTo(this.modal);
+
+            this.incorrect = new UIText('Error', {
+                position: new Vector2(35, 300),
+                size: new Vector2(330, 30),
+                textXAlignment: 'left',
+                fontSize: 14,
+                font: 'myriadpro_light',
+                fontColor: '#FA8641',
+                shadow: true,
+                shadowBlur: 3,
+                visible: false,
+            });
+            this.incorrect.parentTo(this.modal);
+
+            this.isSubmitting = false;
+        }
+
+        clearInputs () {
+            this.incorrect.visible = false;
+            this.nameEnter.text = '';
+            this.tagsEnter.text = '';
+            this.typeDropdown.setCurrentChoice('Items');
+        }
+
+        showError (message) {
+            this.incorrect.visible = true;
+            this.incorrect.text = message;
+        }
+
+        saveCreation () {
+            if (this.isSubmitting) return;
+
+            if (ArtEditor.user === null) {
+                this.showError('Log in or Register to save creations');
+                return;
+            }
+
+            let name = this.nameEnter.text;
+            let type = this.typeDropdown.currentChoice;
+            let tags = this.tagsEnter.text.split(',').map(tag => tag.trim());
+            let isAnimated = ArtEditor.editorScreen.sequence !== null;
+            let image = ArtEditor.editorScreen.exportImage();
+
+            this.isSubmitting = true;
+
+            Posts.createPost(name, tags, image, type, isAnimated)
+                .then((result) => {
+                    if (result.error) throw result.error;
+
+                    this.visible = false
+                    this.isSubmitting = false;
+                    this.clearInputs();
+                })
+                .catch((error) => {
+                    console.log('error saving creation', error);
+                    this.isSubmitting = false;
+
+                    if (typeof error === 'string') {
+                        this.showError(error);
+                    } else {
+                        this.showError('Error saving creation');
+                    }
+                });
         }
     }
 })();

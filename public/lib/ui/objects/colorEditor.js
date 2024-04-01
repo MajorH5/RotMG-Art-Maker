@@ -16,31 +16,32 @@ export const ColorEditor = (function () {
             });
             this.recentColors.parentTo(this);
 
-            const defaultRecents = [
+            this.recents = [];
+
+            const defaultColors = [
                 '#ff0088', '#00ff88', '#8800ff',
                 '#ff8800', '#000000', '#ffffff',
                 '#00ffff', '#ff00ff', '#ffff00',
                 '#0000ff', '#00ff00', '#ff0000'
-            ]
+            ];
 
-            for (let i = 0; i < defaultRecents.length; i++) {
-                this.addRecentColor(defaultRecents[i]);
+            for (let i = 0; i < defaultColors.length; i++) {
+                this.addRecentColor(defaultColors[i]);
             }
 
-            const lastIndex = this.recentColors.children.length - 1;
-            const lastColor = this.recentColors.children[lastIndex];
+            const recent = this.recentColors.children[0];
 
-            lastColor.borderSize = 2;
-            this.activeColor = defaultRecents[lastIndex];
+            recent.borderSize = 2;
+            this.activeColor = this.recents[0];
 
             this.hexTextBox = new UITextBox('hex (xxxxxx)', {
-                positionScale: new Vector2(0.5, 1),
-                position: new Vector2(0.5, -15.5),
+                position: new Vector2(90.5, 65.5),
                 pivot: new Vector2(0.5, 0),
                 size: new Vector2(100, 30),
 
                 maxInputLength: 6,
                 fontColor: 'white',
+                clipChildren: false,
 
                 borderSize: 1,
                 borderColor: '#ffffff',
@@ -68,16 +69,16 @@ export const ColorEditor = (function () {
                 }
             
             });
-            this.hexTextBox.parentTo(this.recentColors);
+            this.hexTextBox.parentTo(this);
 
             this.previewColor = new UIBase({
                 backgroundEnabled: true,
                 backgroundColor: '#ff0000',
 
-                positionScale: new Vector2(0, 1),
-                position: new Vector2(0, 30),
-                sizeScale: new Vector2(1, 0),
-                size: new Vector2(0, 25),
+                positionScale: new Vector2(0.5, 1),
+                position: new Vector2(0, 15),
+                size: new Vector2(180, 25),
+                pivot: new Vector2(0.5, 0),
 
                 borderSize: 2,
                 borderColor: '#ffffff',
@@ -85,7 +86,7 @@ export const ColorEditor = (function () {
                 shadow: true,
                 shadowBlur: 5,
             });
-            this.previewColor.parentTo(this.recentColors);
+            this.previewColor.parentTo(this.hexTextBox);
 
             this.primaryColors = [
                 '#000000', '#1172CB', '#008279',
@@ -175,46 +176,49 @@ export const ColorEditor = (function () {
         }
 
         addRecentColor (color) {
-            const existing = this.recentColors.children.find((child) => child.getAttribute('color') === color);
+            const existing = this.recents.find((recent) => recent === color);
             if (existing) return;
 
-            if (this.recentColors.children.length >= 12) {
-                this.recentColors.children[0].unparent();
+            if (this.recents.length >= 12) {
+                this.recents.pop();
             }
+
+            this.recents.unshift(color);
+            this.recentColors.clearChildren();
 
             const RECENT_COLOR_SIZE = 20;
             const RECENT_COLOR_MARGIN = 10;
 
-            const colorUI = new UIBase({
-                size: Vector2.one.scale(RECENT_COLOR_SIZE),
-    
-                shadow: true,
-                shadowBlur: 5,
+            for (let index = 0; index < this.recents.length; index++) {
+                const current = this.recents[index];
+                const colorUI = new UIBase({
+                    size: Vector2.one.scale(RECENT_COLOR_SIZE),
+        
+                    shadow: true,
+                    shadowBlur: 5,
 
-                borderSize: 0,
-                borderColor: '#ffffff',
-                playMouseDownSound: false,
+                    borderSize: current === color ? 2 : 0,
+                    borderColor: '#ffffff',
+                    playMouseDownSound: false,
 
-                clickable: true,
-                backgroundEnabled: true,
-                backgroundColor: color
-            });
-            colorUI.parentTo(this.recentColors);
-            colorUI.setAttribute('color', color);
+                    clickable: true,
+                    backgroundEnabled: true,
+                    backgroundColor: current
+                });
+                colorUI.parentTo(this.recentColors);
+                colorUI.setAttribute('color', current);
 
-            colorUI.mouseUp.listen(() => {
-                this.setActiveColor(color);
-            });
+                colorUI.mouseUp.listen(() => {
+                    this.setActiveColor(current);
+                });
 
-            this.recentColors.children.forEach((child, index) => {
-                index = this.recentColors.children.length - index - 1;
                 const position = new Vector2(
                     (index % 6) * RECENT_COLOR_SIZE + (index % 6) * RECENT_COLOR_MARGIN,
                     Math.floor(index / 6) * RECENT_COLOR_SIZE + Math.floor(index / 6) * RECENT_COLOR_MARGIN
                 );
 
-                child.positionAbsolute = position;
-            });
+                colorUI.positionAbsolute = position;
+            }
         }
 
         setNonActiveColor (color) {

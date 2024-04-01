@@ -53,11 +53,20 @@ export const Page = (function () {
             return parsed;
         }
 
-        query (searchQuery) {
-            const filtered = this.objects.filter((object) => {
-                return object.objectId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    object.displayId.toLowerCase().includes(searchQuery.toLowerCase());
-            });
+        query (tags, type) {
+            const results = [];
+
+            for (let i = 0; i < this.objects.length; i++) {
+                const object = this.objects[i];
+
+                if (object.Class === type && tags.every((tag) => object.tags.includes(tag))) {
+                    results.push(object);
+                }
+            }
+            // const filtered = this.objects.filter((object) => {
+            //     return object.objectId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            //         object.displayId.toLowerCase().includes(searchQuery.toLowerCase());
+            // });
 
             return filtered;
         }

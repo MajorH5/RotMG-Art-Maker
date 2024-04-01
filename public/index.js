@@ -1,4 +1,5 @@
 import { ArtEditor } from "./lib/artEditor.js";
+import { Constants } from "./lib/utils/constants.js";
 
 var global = global || (() => {
     if (typeof self !== 'undefined') { return self; }
@@ -15,15 +16,15 @@ var global = global || (() => {
     
     const artEditor = new ArtEditor(canvas, context);
 
-    // Expose the ArtEditor API to the global object
-    // just so it can be accessed from the console
-    Object.defineProperty(global, 'ArtEditor', {
-        value: artEditor,
-        writable: false,
-        enumerable: false,
-        configurable: false
-    });
-
+    if (Constants.DEV_ENVIRONMENT) {
+        Object.defineProperty(global, 'ArtEditor', {
+            value: artEditor,
+            writable: false,
+            enumerable: false,
+            configurable: false
+        });
+    }
+    
     await artEditor.initialize();
     artEditor.globalStart();
 })();

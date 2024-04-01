@@ -59,19 +59,19 @@ export const PackagedSequence = (function () {
             const packagedSequence = new PackagedSequence(json.size);
             
             packagedSequence.stand = new Frame(json.size);
-            packagedSequence.stand.pixels = json.stand;
+            packagedSequence.stand.pixels = PackagedSequence.decompress(json.stand, json.size.x, json.size.y);
 
             packagedSequence.walk1 = new Frame(json.size);
-            packagedSequence.walk1.pixels = json.walk1;
+            packagedSequence.walk1.pixels = PackagedSequence.decompress(json.walk1, json.size.x, json.size.y);
 
             packagedSequence.walk2 = new Frame(json.size);
-            packagedSequence.walk2.pixels = json.walk2;
+            packagedSequence.walk2.pixels = PackagedSequence.decompress(json.walk2, json.size.x, json.size.y);
 
             packagedSequence.attack1 = new Frame(json.size);
-            packagedSequence.attack1.pixels = json.attack1;
+            packagedSequence.attack1.pixels = PackagedSequence.decompress(json.attack1, json.size.x, json.size.y);
 
             packagedSequence.attack2 = new Frame(new Vector2(json.size.x * 2, json.size.y));
-            packagedSequence.attack2.pixels = json.attack2;
+            packagedSequence.attack2.pixels = PackagedSequence.decompress(json.attack2, json.size.x * 2, json.size.y);
 
             return packagedSequence;
         }
@@ -108,15 +108,63 @@ export const PackagedSequence = (function () {
             return hexColors;
         }
 
+        static compress (array, width, height) {
+            let colors = new Array(width * height).fill(-1);
+
+            for (let y = 0; y < array.length; y++) {
+                for (let x = 0; x < array[y].length; x++) {
+                    const i = y * array[y].length + x;
+
+                    if (array[y][x] === null) {
+                        colors[i] = -1
+                    } else {
+                        // pack into a single number
+                        const color = array[y][x];
+                        const r = parseInt(color.substring(1, 3), 16);
+                        const g = parseInt(color.substring(3, 5), 16);
+                        const b = parseInt(color.substring(5, 7), 16);
+
+                        const packed = (r << 16) | (g << 8) | b;
+                        colors[i] = packed;
+                    }
+                }
+            }
+
+            return colors;
+        
+        }
+
+        static decompress (array, width, height) {
+            let colors = new Array(width * height).fill(null);
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const i = y * width + x;
+
+                    if (array[i] === -1) {
+                        colors[y][x] = null;
+                    } else {
+                        const r = (array[i] >> 16) & 0xFF;
+                        const g = (array[i] >> 8) & 0xFF;
+                        const b = array[i] & 0xFF;
+
+                        colors[y][x] = "#" + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
+                    }
+                }
+            }
+
+            return colors;
+        }
+
         toJSON () {
-            return JSON.stringify({
-                'stand': this.stand.pixels,
-                'attack1': this.attack1.pixels,
-                'attack2': this.attack2.pixels,
-                'walk1': this.walk1.pixels,
-                'walk2': this.walk2.pixels,
+            return {
+                'stand': PackagedSequence.compress(this.stand.pixels, this.size.x, this.size.y),
+                'walk1': PackagedSequence.compress(this.walk1.pixels, this.size.x, this.size.y),
+                'walk2': PackagedSequence.compress(this.walk2.pixels, this.size.x, this.size.y),
+                'attack1': PackagedSequence.compress(this.attack1.pixels, this.size.x, this.size.y),
+                'attack2': PackagedSequence.compress(this.attack2.pixels, this.size.x * 2, this.size.y),
                 'size': {x: this.size.x, y: this.size.y}
-            }); 
+            };
         }
 
         edit (frame, position, value) {

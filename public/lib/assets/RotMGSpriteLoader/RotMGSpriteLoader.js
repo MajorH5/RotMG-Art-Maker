@@ -3,7 +3,6 @@ import { Constants } from "../../utils/constants.js";
 
 export const RotMGSpriteLoader = (function () {
     return class RotMGSpriteLoader {
-        // static OBJECTS_JSON_URL = 'https://static.drips.pw/rotmg/production/current/json/Objects.json';
         static OBJECTS_JSON_URL = Constants.ORIGIN + '/Objects.json';
         static globalObjects = null;
         static objecLoadPromise = null;   
@@ -54,9 +53,6 @@ export const RotMGSpriteLoader = (function () {
         }
 
         getTotalPages () {
-            // return this.pages.reduce((a, b) => {
-                
-            // }, 0);
             return Math.ceil(RotMGSpriteLoader.globalObjects.length / this.pageSize);
         }
 
@@ -65,13 +61,13 @@ export const RotMGSpriteLoader = (function () {
             return this.pages.at(index % this.pages.length);
         }
         
-        query (searchQuery) {
+        query (tags, type) {
             if (this.pages.length === 0) this.initializePages();
             let resultObjects = [];
             const pages = [];
 
             this.pages.forEach((page) => {
-                const matches = page.query(searchQuery);
+                const matches = page.query(tags, type);
 
                 if (matches.length > 0) {
                     for (let i = 0; i < matches.length; i++) {

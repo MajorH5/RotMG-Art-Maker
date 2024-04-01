@@ -3,6 +3,7 @@ import { UITextBox } from "../uiTextBox.js";
 import { UIBase } from "../uiBase.js";
 import { UIText } from "../uiText.js";
 import { Sounds } from "../../assets/sounds.js";
+import { Auth } from "../../api/auth.js";
 
 export const CurrentAccountScreen = (function () {
     return class CurrentAccountScreen extends UIBase {
@@ -103,7 +104,43 @@ export const CurrentAccountScreen = (function () {
                 shadowBlur: 3,
             });
             this.bindHover(this.notVerified, '#ffda84', '#ffffff');
+            this.notVerified.mouseUp.listen(() => {
+                if (ArtEditor.user === null) return;
+                
+                Auth.resendVerificationEmail(ArtEditor.user.token).then((result) => {
+                    if (result.error === 'User is already verified') {
+                        ArtEditor.user.verified = true;
+                        Auth.setCookie('jwt', Auth.encodeUser(ArtEditor.user), 1);
+                        this.notVerified.visible = false;
+                        this.incorrect.visible = false;
+                        return;
+                    }
+
+                    this.sent.visible = result.error === undefined;
+                    this.notVerified.visible = !this.sent.visible;
+                    
+                    this.incorrect.visible = true;
+                    this.incorrect.text = result.error || result.message || '';
+                    
+                    if (result.error) {
+                        Sounds.playSfx(Sounds.SND_ERROR);
+                    }
+                });
+            })
             this.notVerified.parentTo(this.modal);
+
+            this.sent = new UIText('Sent...', {
+                position: new Vector2(35, 160),
+                size: new Vector2(330, 15),
+                textXAlignment: 'left',
+                fontSize: 14,
+                font: 'myriadpro_light',
+                fontColor: '#aaaaaa',
+                shadow: true,
+                shadowBlur: 3,
+                visible: false
+            });
+            this.sent.parentTo(this.modal);
 
             this.changePassword = new UIText('Click here to change password', {
                 position: new Vector2(35, 180),
@@ -131,6 +168,19 @@ export const CurrentAccountScreen = (function () {
             this.bindHover(this.notYou, '#ffda84', '#ffffff');
             this.notYou.parentTo(this.modal);
 
+            this.incorrect = new UIText('Error', {
+                position: new Vector2(35, 220),
+                size: new Vector2(330, 30),
+                textXAlignment: 'left',
+                fontSize: 14,
+                font: 'myriadpro_light',
+                fontColor: '#FA8641',
+                shadow: true,
+                shadowBlur: 3,
+                visible: false
+            });
+            this.incorrect.parentTo(this.modal);
+
             this.continue = new UIText('Continue', {
                 positionScale: new Vector2(1, 1),
                 position: new Vector2(-20, -20),
@@ -148,6 +198,9 @@ export const CurrentAccountScreen = (function () {
 
             this.continue.mouseUp.listen(async () => {
                 this.visible = false;
+                this.incorrect.visible = false;
+                this.sent.visible = false;
+                this.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.verified;
             });
         }
         

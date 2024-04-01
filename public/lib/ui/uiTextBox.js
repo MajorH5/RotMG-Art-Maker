@@ -25,7 +25,7 @@ export const UITextBox = (function () {
             this.selectionEnd = 0;
             this.selectionAnchor = 0;
 
-            this.clipChildren = true;
+            this.clipChildren = typeof options.clipChildren !== 'undefined' ? options.clipChildren : true;
 
             this.multiline = typeof options.multiline !== 'undefined' ? options.multiline : false;
             this.placeholder = placeholder;
@@ -195,7 +195,7 @@ export const UITextBox = (function () {
                             return;
                         }
 
-                        if (this.text.length < this.maxInputLength) {
+                        if (this.text.length < this.maxInputLength || this.selectionStart !== this.selectionEnd) {
                             if (this.selectionStart === this.selectionEnd) {
                                 this.text = this.text.substring(0, this.cursorPosition) + key + this.text.substring(this.cursorPosition);
                             } else {
