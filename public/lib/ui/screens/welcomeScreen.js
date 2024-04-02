@@ -51,7 +51,7 @@ export const WelcomeScreen = (function () {
             });
             this.header.parentTo(this.modal);
 
-            this.welcomeText = new UIText('Welcome to RotMG Art Editor. By clicking \'Enter\', you are indicating that you have read and agreed to the Terms of Use and Privacy Policy.', {
+            this.welcomeText = new UIText('Welcome to RealmSpriter. By clicking \'Enter\', you are indicating that you have read and agreed to the Terms of Use and Privacy Policy.', {
                 positionScale: new Vector2(0, 0.1),
                 sizeScale: new Vector2(1, 0.7),
 
