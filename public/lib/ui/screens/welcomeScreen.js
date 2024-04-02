@@ -79,7 +79,7 @@ export const WelcomeScreen = (function () {
                 fontColor: '#5d56bd',
             });
             this.tos.mouseUp.listen(() => {
-                window.open(`${Constants.ORIGIN}/terms_of_use.html`, '_blank');
+                window.open(`${Constants.ORIGIN}/legal/terms-of-use`, '_blank');
             });
             this.tos.parentTo(this.modal);
 
@@ -94,7 +94,7 @@ export const WelcomeScreen = (function () {
                 fontColor: '#5d56bd',
             });
             this.pp.mouseUp.listen(() => {
-                window.open(`${Constants.ORIGIN}/privacy_policy.html`, '_blank');
+                window.open(`${Constants.ORIGIN}/legal/privacy-policy`, '_blank');
             });
             this.pp.parentTo(this.modal);
 
@@ -107,7 +107,8 @@ export const WelcomeScreen = (function () {
 
             this.enter.mouseUp.listen(() => {
                 this.visible = false;
-                Sounds.playTheme(Sounds.SND_THEME);
+                ArtEditor.legalScreen.visible = true;
+                // Sounds.playTheme(Sounds.SND_THEME);
             });
         }
     }

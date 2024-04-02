@@ -168,13 +168,13 @@ export const UIText = (function () {
                 context.shadowOffsetY = this.shadowOffset.y;
             }
 
-            // context.save();
+            context.save();
 
-            // if (this.clipChildren) {
-            //     const path = new Path2D();
-            //     path.rect(rootPosition.x, rootPosition.y, size.x, size.y);
-            //     context.clip(path);
-            // }
+            if (this.clipChildren) {
+                const path = new Path2D();
+                path.rect(rootPosition.x, rootPosition.y, size.x, size.y);
+                context.clip(path);
+            }
 
             const lines = this.textWraps ? this.getLines(context, text, size.x) : text.split('\n');
             const textHeight = (this.fontSize + 5) * lines.length;
@@ -219,7 +219,7 @@ export const UIText = (function () {
                 context.fillText(text, position.x, position.y);
             }
             
-            // context.restore();
+            context.restore();
             context.globalAlpha = 1;
             context.shadowColor = "black";
             context.shadowBlur = 0;

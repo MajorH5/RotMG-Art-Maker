@@ -6,9 +6,9 @@ import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
 
 export const LegalScreen = (function () {
-    const disclaimerText = `This website and the tools provided herein are intended for entertainment and educational purposes only. This tool is a clone of an older tool originally created by Wildshadow Studios and is not associated with Realm of the Mad God (RotMG) or DECA LIVE OPERATIONS GMBH in any way.
+    const disclaimerText = `This website (www.realmspriter.com) and the tools provided herein are intended for entertainment and educational purposes only. This tool is a clone of a currently defunct tool originally created by Wildshadow Studios and is not associated with Realm of the Mad God (RotMG) or DECA LIVE OPERATIONS GMBH in any way.
 
-All trademarks, service marks, trade names, product names, artworks, logos, and trade dress appearing on this website are the property of their respective owners, including but not limited to Wildshadow Studios and DECA LIVE OPERATIONS GMBH. Any reference to specific entities or brands on this website is purely for informational purposes and does not imply endorsement or affiliation.
+All trademarks, service marks, trade names, product names, artworks, logos, and trade dress appearing on this website are the property of their respective owners, including but not limited to Wildshadow Studios, Kabam, Inc., and DECA LIVE OPERATIONS GMBH. Any reference to specific entities or brands on this website is purely for informational purposes and does not imply endorsement or affiliation.
 
 By using this website and the tools provided herein, you agree to use them responsibly and in accordance with all applicable laws, rules, and regulations. You further acknowledge that the creators of this website shall not be liable for any damages or losses arising from the use or misuse of the tools provided.
 
@@ -54,7 +54,7 @@ By selecting "I Understand", you acknowledge that you have read and understood t
             });
             this.modal.parentTo(this);
 
-            this.header = new UIText('Disclaimer & Terms of Use', {
+            this.header = new UIText('Disclaimer', {
                 position: new Vector2(0, 25),
                 sizeScale: new Vector2(1, 0),
                 
@@ -104,8 +104,8 @@ By selecting "I Understand", you acknowledge that you have read and understood t
 
                 if (scrollAmmount > 0) {
                     scrollAmmount = 0;
-                } else if (scrollAmmount < -400) {
-                    scrollAmmount = -400;
+                } else if (scrollAmmount < -420) {
+                    scrollAmmount = -420;
                 }
 
                 this.disclaimer.positionAbsolute = new Vector2(0, scrollAmmount);

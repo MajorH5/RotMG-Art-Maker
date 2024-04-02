@@ -8,6 +8,26 @@ export const UITextBox = (function () {
     return class UITextBox extends UIText {
         static current = null;
 
+        static {
+            document.oncopy = (event) => {
+                if (UITextBox.current !== null && UITextBox.current.focused) {
+                    UITextBox.current.oncopy(event);
+                }
+            }
+
+            document.oncut = (event) => {
+                if (UITextBox.current !== null && UITextBox.current.focused) {
+                    UITextBox.current.oncut(event);
+                }
+            }
+
+            document.onpaste = (event) => {
+                if (UITextBox.current !== null && UITextBox.current.focused) {
+                    UITextBox.current.onpaste(event);
+                }
+            }
+        }
+
         constructor(placeholder, options) {
             super('', options);
 
@@ -80,12 +100,15 @@ export const UITextBox = (function () {
 
         handleKeyInput(event) {
             if (!this.focused) return;
-            event.preventDefault();
 
             this.cursorVisible = true;
             this.lastCursorFlash = Date.now();
 
             const { key, ctrlKey, shiftKey } = event;
+
+            if (ctrlKey && !['c', 'x', 'v'].includes(key.toLowerCase())) {
+                event.preventDefault();
+            }
 
             switch (key) {
                 case 'Backspace':
@@ -162,35 +185,35 @@ export const UITextBox = (function () {
                                     this.selectionEnd = this.text.length;
                                     this.cursorPosition = this.selectionEnd;
                                     break;
-                                case 'v':
-                                    navigator.clipboard.readText().then((text) => {
-                                        const maxAllowed = Math.min(this.maxInputLength - this.text.length, text.length);
-                                        text = text.substring(0, maxAllowed);
+                                // case 'v':
+                                //     navigator.clipboard.readText().then((text) => {
+                                //         const maxAllowed = Math.min(this.maxInputLength - this.text.length, text.length);
+                                //         text = text.substring(0, maxAllowed);
 
-                                        if (this.selectionStart === this.selectionEnd) {
-                                            this.text = this.text.substring(0, this.cursorPosition) + text + this.text.substring(this.cursorPosition);
-                                        } else {
-                                            this.text = this.text.substring(0, this.selectionStart) + text + this.text.substring(this.selectionEnd);
-                                            this.cursorPosition = this.selectionStart;
-                                            this.selectionStart = this.selectionEnd = 0;
-                                        }
+                                //         if (this.selectionStart === this.selectionEnd) {
+                                //             this.text = this.text.substring(0, this.cursorPosition) + text + this.text.substring(this.cursorPosition);
+                                //         } else {
+                                //             this.text = this.text.substring(0, this.selectionStart) + text + this.text.substring(this.selectionEnd);
+                                //             this.cursorPosition = this.selectionStart;
+                                //             this.selectionStart = this.selectionEnd = 0;
+                                //         }
                                         
-                                        this.cursorPosition += text.length;
-                                        this.onInput.trigger(this.text, text);
-                                    });
-                                    break;
-                                case 'c':
-                                case 'x':
-                                    if (this.selectionStart !== this.selectionEnd) {
-                                        navigator.clipboard.writeText(this.text.substring(this.selectionStart, this.selectionEnd));
+                                //         this.cursorPosition += text.length;
+                                //         this.onInput.trigger(this.text, text);
+                                //     });
+                                //     break;
+                                // case 'c':
+                                // case 'x':
+                                //     if (this.selectionStart !== this.selectionEnd) {
+                                //         navigator.clipboard.writeText(this.text.substring(this.selectionStart, this.selectionEnd));
 
-                                        if (key === 'x') {
-                                            this.text = this.text.substring(0, this.selectionStart) + this.text.substring(this.selectionEnd);
-                                            this.cursorPosition = this.selectionStart;
-                                            this.selectionStart = this.selectionEnd = 0;
-                                        }
-                                    }
-                                    break;
+                                //         if (key === 'x') {
+                                //             this.text = this.text.substring(0, this.selectionStart) + this.text.substring(this.selectionEnd);
+                                //             this.cursorPosition = this.selectionStart;
+                                //             this.selectionStart = this.selectionEnd = 0;
+                                //         }
+                                //     }
+                                //     break;
                             }
                             return;
                         }
@@ -209,6 +232,37 @@ export const UITextBox = (function () {
                     }
                     break;
             }
+        }
+
+        oncopy (event) {
+            event.preventDefault();
+            event.clipboardData.setData('text/plain', this.text.substring(this.selectionStart, this.selectionEnd));
+        }
+
+        oncut (event) {
+            event.preventDefault();
+            event.clipboardData.setData('text/plain', this.text.substring(this.selectionStart, this.selectionEnd));
+            this.text = this.text.substring(0, this.selectionStart) + this.text.substring(this.selectionEnd);
+            this.cursorPosition = this.selectionStart;
+            this.selectionStart = this.selectionEnd = 0;
+        }
+
+        onpaste (event) {
+            event.preventDefault();
+            let text = event.clipboardData.getData('text/plain');
+            const maxAllowed = Math.min(this.maxInputLength - this.text.length, text.length);
+            text = text.substring(0, maxAllowed);
+
+            if (this.selectionStart === this.selectionEnd) {
+                this.text = this.text.substring(0, this.cursorPosition) + text + this.text.substring(this.cursorPosition);
+            } else {
+                this.text = this.text.substring(0, this.selectionStart) + text + this.text.substring(this.selectionEnd);
+                this.cursorPosition = this.selectionStart;
+                this.selectionStart = this.selectionEnd = 0;
+            }
+            
+            this.cursorPosition += text.length;
+            this.onInput.trigger(this.text, text);
         }
 
         focus() {
@@ -289,18 +343,18 @@ export const UITextBox = (function () {
 
             super.render(context, screenSize);
 
-            // context.save();
+            context.save();
 
             const text = this.getRenderedText();
 
             const objectPosition = this.getScreenPosition(screenSize);
             const objectSize = this.getScreenSize(screenSize);
 
-            // if (this.clipChildren) {
-            //     const path = new Path2D();
-            //     path.rect(objectPosition.x, objectPosition.y, objectSize.x, objectSize.y);
-            //     context.clip(path);
-            // }
+            if (this.clipChildren) {
+                const path = new Path2D();
+                path.rect(objectPosition.x, objectPosition.y, objectSize.x, objectSize.y);
+                context.clip(path);
+            }
 
 
             if (text === '' && !this.focused) {
@@ -376,7 +430,7 @@ export const UITextBox = (function () {
             }
 
             this.context = context;
-            // context.restore();
+            context.restore();
         }
 
     }

@@ -86,7 +86,8 @@ export const ChangePasswordScreen = (function () {
                 fontColor: '#bbbbbb',
                 borderColor: '#4f4f4f',
                 placeholderColor: 'gray',
-                
+                textWraps: false,
+
                 borderSize: 3,
                 paddingLeft: 5,
 
@@ -118,6 +119,7 @@ export const ChangePasswordScreen = (function () {
                 fontColor: '#bbbbbb',
                 borderColor: '#4f4f4f',
                 placeholderColor: 'gray',
+                textWraps: false,
 
                 borderSize: 3,
                 paddingLeft: 5,
@@ -150,6 +152,7 @@ export const ChangePasswordScreen = (function () {
                 fontColor: '#bbbbbb',
                 borderColor: '#4f4f4f',
                 placeholderColor: 'gray',
+                textWraps: false,
 
                 borderSize: 3,
                 paddingLeft: 5,
