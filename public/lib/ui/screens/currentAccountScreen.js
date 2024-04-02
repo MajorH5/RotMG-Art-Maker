@@ -200,7 +200,7 @@ export const CurrentAccountScreen = (function () {
             this.continue.mouseUp.listen(async () => {
                 this.visible = false;
                 this.sent.visible = false;
-                this.incorxrect.visible = false;
+                this.incorrect.visible = false;
                 this.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.details.verified;
             });
         }
