@@ -25,13 +25,24 @@ export const RotmgButtonDefault = (function () {
             });
 
             this.mouseEnter.listen(() => {
+                this.hovered = true;
+                if (!this.active) return;
                 this.backgroundColor = '#FFDA84';
             });
             
             this.mouseLeave.listen(() => {
+                this.hovered = false;
+                if (!this.active) return;
                 this.backgroundColor = '#ffffff';
             });
             
+            this.hovered = false;
+            this.active = true;
+        }
+
+        setActive (active) {
+            this.active = active;
+            this.backgroundColor = active ? (this.hovered ? '#ffda84' : '#ffffff'): '#4f4f4f';
         }
     }
 })();

@@ -6,7 +6,7 @@ import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
 
 export const LegalScreen = (function () {
-    const disclaimerText = `This website (www.realmspriter.com) and the tools provided herein are intended for entertainment and educational purposes only. This tool is a clone of a currently defunct tool originally created by Wildshadow Studios and is not associated with Realm of the Mad God (RotMG) or DECA LIVE OPERATIONS GMBH in any way.
+    const disclaimerText = `This website (www.realmspriter.com) and the tools provided herein are intended for entertainment and educational purposes only. This tool is a clone of a currently defunct tool originally created by Wildshadow Studios and is NOT associated with Realm of the Mad God (RotMG) or DECA LIVE OPERATIONS GMBH in any way.
 
 All trademarks, service marks, trade names, product names, artworks, logos, and trade dress appearing on this website are the property of their respective owners, including but not limited to Wildshadow Studios, Kabam, Inc., and DECA LIVE OPERATIONS GMBH. Any reference to specific entities or brands on this website is purely for informational purposes and does not imply endorsement or affiliation.
 
@@ -19,7 +19,7 @@ Users are advised to ensure that they have the necessary rights and permissions 
 This website and its creators reserve the right to modify, suspend, or terminate access to the tools provided herein at any time and without prior notice.
 The artwork uploaded to this website may be subject to removal or deletion at the discretion of the website owners or administrators. Reasons for removal may include, but are not limited to:
 
-Violation of the website's terms of service or community guidelines,
+Violation of the website's terms of use,
 Copyright infringement or intellectual property disputes,
 Inappropriate or offensive content,
 Technical issues or maintenance requirements.
@@ -97,7 +97,7 @@ By selecting "I Understand", you acknowledge that you have read and understood t
             this.scrollBar.parentTo(this.container);
 
             let scrollAmmount = 0;
-            let scrollSpeed = 30;
+            let scrollSpeed = 20;
 
             this.container.scrolled.listen((direction) => {
                 scrollAmmount += direction * scrollSpeed;

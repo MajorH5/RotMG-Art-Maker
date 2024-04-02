@@ -113,7 +113,7 @@ export const CurrentAccountScreen = (function () {
                         Auth.setCookie('jwt', Auth.encodeUser(ArtEditor.user), 1);
                         this.notVerified.visible = false;
                         this.incorrect.visible = true;
-                        this.incorrect.text = 'Your are already verified';
+                        this.incorrect.text = 'You\'re already verified';
                         return;
                     }
 

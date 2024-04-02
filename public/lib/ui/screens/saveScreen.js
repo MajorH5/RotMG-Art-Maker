@@ -171,7 +171,7 @@ export const SaveScreen = (function () {
 
             this.incorrect = new UIText('Error', {
                 position: new Vector2(35, 300),
-                size: new Vector2(330, 30),
+                size: new Vector2(330, 50),
                 textXAlignment: 'left',
                 fontSize: 14,
                 font: 'myriadpro_light',
@@ -205,6 +205,8 @@ export const SaveScreen = (function () {
                 return;
             }
 
+            this.saveButton.setActive(false);
+
             let name = this.nameEnter.text;
             let type = this.typeDropdown.currentChoice;
             let tags = this.tagsEnter.text.split(',').map(tag => tag.trim());
@@ -218,18 +220,26 @@ export const SaveScreen = (function () {
                     if (result.error) throw result.error;
 
                     this.visible = false
-                    this.isSubmitting = false;
                     this.clearInputs();
+                    
+                    setTimeout(() => {
+                        this.isSubmitting = false;
+                        this.saveButton.setActive(true);
+                    }, 1000);
                 })
                 .catch((error) => {
                     console.log('error saving creation', error);
-                    this.isSubmitting = false;
 
                     if (typeof error === 'string') {
                         this.showError(error);
                     } else {
                         this.showError('Error saving creation');
                     }
+
+                    setTimeout(() => {
+                        this.isSubmitting = false;
+                        this.saveButton.setActive(true);
+                    }, 1000);
                 });
         }
     }

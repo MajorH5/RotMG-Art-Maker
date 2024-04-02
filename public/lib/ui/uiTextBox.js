@@ -245,6 +245,7 @@ export const UITextBox = (function () {
             this.text = this.text.substring(0, this.selectionStart) + this.text.substring(this.selectionEnd);
             this.cursorPosition = this.selectionStart;
             this.selectionStart = this.selectionEnd = 0;
+            this.onInput.trigger(this.text);
         }
 
         onpaste (event) {
