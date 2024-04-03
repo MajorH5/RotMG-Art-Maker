@@ -83,7 +83,7 @@ export const SpriteCell = (function () {
                         clearInterval(interval);
                     }
                     
-                    this.sprite.setFrame(current + 1);
+                    this.sprite.setFrame(current);
                     current = (current + 1) % 4
                 }, 200);
             }
