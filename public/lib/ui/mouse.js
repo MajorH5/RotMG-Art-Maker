@@ -26,8 +26,10 @@ export const Mouse = (function () {
             if (touch !== null) {
                 this.identifier = touch.identifier;
                 this.down = true;
-                this.position.x = touch.clientX;
-                this.position.y = touch.clientY;
+
+                const position = this.normalizePosition(touch.clientX, touch.clientY);
+                this.position.x = position.x;
+                this.position.y = position.y;
             }
 
             this.setupEvents();

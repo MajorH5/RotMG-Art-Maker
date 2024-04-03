@@ -25,6 +25,7 @@ canvas {
     -webkit-user-select: none;
     -ms-user-select: none;
     -o-user-select: none;
+    touch-action: none;
 }
 
 body {
