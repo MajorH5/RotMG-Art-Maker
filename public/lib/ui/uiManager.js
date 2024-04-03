@@ -33,6 +33,8 @@ export const UIManager = (function () {
                     // useless?
                     mouse.mouseDown.trigger(mouse.position, mouse);
                 }
+
+                event.preventDefault();
             });
 
             document.addEventListener('touchend', (event) => {
