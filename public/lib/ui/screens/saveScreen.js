@@ -186,6 +186,9 @@ export const SaveScreen = (function () {
         }
 
         clearInputs () {
+            if (ArtEditor.editorScreen.currentPost) {
+                return;
+            }
             this.incorrect.visible = false;
             this.nameEnter.text = '';
             this.tagsEnter.text = '';
@@ -220,12 +223,13 @@ export const SaveScreen = (function () {
                     if (result.error) throw result.error;
 
                     this.visible = false
-                    this.clearInputs();
                     
                     setTimeout(() => {
                         this.isSubmitting = false;
                         this.saveButton.setActive(true);
                     }, 1000);
+
+                    ArtEditor.editorScreen.currentPost = true;
                 })
                 .catch((error) => {
                     console.log('error saving creation', error);

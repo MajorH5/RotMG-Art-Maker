@@ -1,15 +1,28 @@
 import { RotMGSpriteLoader } from "../assets/RotMGSpriteLoader/RotMGSpriteLoader.js";
 import { Page } from "../assets/RotMGSpriteLoader/page.js";
 import { Posts } from "../api/posts.js";
+import { Post } from "./post.js";
 
 export const Query = (function () {
     return class {
-        static async searchMyPosts (tags, type, pageIndex) {
-            return Posts.getPosts(true, tags, type, pageIndex);
-        }
+        static async searchMyPosts (tags, type, offset) {
+            const results = await Posts.getPosts(true, tags, type, offset);
 
-        static async searchAllPosts (tags, type, pageIndex) {
-            return Posts.getPosts(false, tags, type, pageIndex);
+            results.posts = results.posts.map((post) => {
+                return new Post(post);
+            });
+            
+            return results;
+        }
+        
+        static async searchAllPosts (tags, type, offset) {
+            const results = await Posts.getPosts(false, tags, type, offset);
+
+            results.posts = results.posts.map((post) => {
+                return new Post(post);
+            });
+            
+            return results;
         }
 
         static async searchSprites (tags) {
@@ -29,36 +42,14 @@ export const Query = (function () {
                 const startIndex = i * pageSize;
                 const endIndex = startIndex + pageSize;
                 
-                const objects = objects.slice(startIndex, endIndex);
-                const page = new Page(i, objects, false);
+                const divded = objects.slice(startIndex, endIndex);
+                const page = new Page(i, divded, false);
 
                 pages.push(page);
             }
 
             return pages;
         } 
-
-        static getSearchIndex (totalRotMGResults, totalRealmSpriterResults, pageIndex) {
-            const OBJECTS_PER_PAGE = 15;
-            
-            // if there are no realm spriter results
-            // then no point in searching further
-            if (totalRealmSpriterResults === 0) {
-                return null;
-            }
-
-            // check if this page is still within bounds
-            /// of the rotmg sprites
-            if ((pageIndex + 1) * OBJECTS_PER_PAGE <= totalRotMGResults) {
-                // no need to query realm spriter for this page
-                return null;
-            }
-
-            const excess = (pageIndex + 1) * OBJECTS_PER_PAGE - totalRotMGResults;
-            const searchIndex = Math.floor(excess / OBJECTS_PER_PAGE);
-
-            return [searchIndex, excess % OBJECTS_PER_PAGE];
-        }
         
         static async search (domain, type, tags, pageIndex = 0) {
             const OBJECTS_PER_PAGE = 15;
@@ -67,31 +58,56 @@ export const Query = (function () {
                 const objects = ArtEditor.editorScreen.loadScreen.spriteLoader.query(tags, type);
                 const pages = Query.divideObjects(objects, 15);
 
-                return [pages.at(pageIndex % pages.length), 0];
+                return [pages.at(pageIndex % pages.length), Math.ceil(objects.length / OBJECTS_PER_PAGE)];
             } else if (domain === 'Community') {
-                const { posts, total } = await Query.searchAllPosts(tags, type, pageIndex);
-                const page = new Page(pageIndex, posts, true);
+                const { posts, total } = await Query.searchAllPosts(tags, type, pageIndex * OBJECTS_PER_PAGE);
+                const page = new Page(pageIndex, posts, false);
 
-                return [page, total];
+                return [page, Math.ceil(total / OBJECTS_PER_PAGE)];
             } else if (domain === 'Mine') {
-                const { posts, total } = await Query.searchMyPosts(tags, type, pageIndex);
-                const page = new Page(pageIndex, posts, true);
+                const { posts, total } = await Query.searchMyPosts(tags, type, pageIndex * OBJECTS_PER_PAGE);
+                const page = new Page(pageIndex, posts, false);
                 
-                return [page, total];
+                return [page, Math.ceil(total / OBJECTS_PER_PAGE)];
             } else if (domain === 'All') {
                 const objects = ArtEditor.editorScreen.loadScreen.spriteLoader.query(tags, type);
-                const { total } = await Query.searchAllPosts(tags, type, 0);
+                const totalRotMGResults = objects.length;
+                let totalRealmSpriterResults = 0;
+                let totalRealmPages = Math.ceil(objects.length / OBJECTS_PER_PAGE) + 1;
+                let actualIndex = (pageIndex % totalRealmPages + totalRealmPages) % totalRealmPages;
                 
-                if ((pageIndex + 1) * OBJECTS_PER_PAGE <= totalRotMGResults) {
-                    const pages = Query.divideObjects(objects, 15);
-                    return [pages.at(pageIndex % pages.length), null];
+                if ((actualIndex + 1) * OBJECTS_PER_PAGE > totalRotMGResults) {
+                    const end = (actualIndex + 1) * OBJECTS_PER_PAGE - totalRotMGResults;
+                    let start = end - OBJECTS_PER_PAGE;
+                    
+                    if (start < 0) {
+                        start = 0;
+                    }
+
+                    for (let i = 0; i < start; i++) {
+                        objects.push(null);
+                    }
+
+                    const { posts, total } = await Query.searchAllPosts(tags, type, start);
+
+                    for (let i = 0; i < posts.length; i++) {
+                        objects.push(posts[i]);
+                    }
+
+                    totalRealmSpriterResults = total;
                 }
 
-                const [searchIndex, excess] = Query.getSearchIndex(objects.length, total, pageIndex);
-                const { posts } = await Query.searchAllPosts(tags, type, searchIndex);
+                const pages = Query.divideObjects(objects, 15);
+                let totalPages = pages.length;
 
-                
-                
+                if (totalPages > 0) {
+                    pageIndex = (pageIndex % totalPages + totalPages) % totalPages;
+                } else {
+                    pageIndex = 0;
+                }
+
+
+                return [pages.at(pageIndex), totalPages];
             }
         }
     }

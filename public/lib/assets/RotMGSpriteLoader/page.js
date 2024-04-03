@@ -59,16 +59,17 @@ export const Page = (function () {
             for (let i = 0; i < this.objects.length; i++) {
                 const object = this.objects[i];
 
-                if (object.Class === type && tags.every((tag) => object.tags.includes(tag))) {
+                const matches = tags.length === 0 || tags.find((tag) => {
+                    return object.objectId.toLowerCase().includes(tag.toLowerCase()) ||
+                        object.displayId.toLowerCase().includes(tag.toLowerCase());
+                });
+                
+                if (object.isType(type) && matches) {
                     results.push(object);
                 }
             }
-            // const filtered = this.objects.filter((object) => {
-            //     return object.objectId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            //         object.displayId.toLowerCase().includes(searchQuery.toLowerCase());
-            // });
 
-            return filtered;
+            return results;
         }
     }
 })();

@@ -10,11 +10,11 @@ export const Posts = (function (){
             return API.post('/delete-post', { postid, token: ArtEditor.user.token });
         }
 
-        static async getPosts (mineOnly = true, tags = [], type  = '', pageIndex = 0) {
+        static async getPosts (mineOnly = true, tags = [], type  = '', offset) {
             if (mineOnly) {
-                return API.post('/get-posts', { mineOnly, tags, type, pageIndex, token: ArtEditor.user.token });
+                return API.post('/get-posts', { mineOnly, tags, type, offset, token: ArtEditor.user.token });
             } else {
-                return API.post('/get-posts', { mineOnly, tags, type, pageIndex });
+                return API.post('/get-posts', { mineOnly, tags, type, offset });
             }
         }
     }

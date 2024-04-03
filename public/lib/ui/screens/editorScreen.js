@@ -20,6 +20,8 @@ import { SignUpScreen } from './signupScreen.js';
 import { CurrentAccountScreen } from './currentAccountScreen.js';
 import { ChangePasswordScreen } from './changePasswordScreen.js';
 import { ForgotPasswordScreen } from './forgotPasswordScreen.js';
+import { DeleteScreen } from './deleteScreen.js';
+import { ResetPasswordScreen } from './resetPassswordScreen.js';
 
 export const EditorScreen = (function () {
     return class EditorScreen extends UIBase {
@@ -227,8 +229,14 @@ export const EditorScreen = (function () {
             this.signUpScreen = new SignUpScreen();
             this.signUpScreen.parentTo(this);
 
+            this.resetPasswordScreen = new ResetPasswordScreen();
+            this.resetPasswordScreen.parentTo(this);
+
             this.currentAccountScreen = new CurrentAccountScreen();
             this.currentAccountScreen.parentTo(this);
+
+            this.deleteScreen = new DeleteScreen();
+            this.deleteScreen.parentTo(this);
 
             this.changePasswordScreen = new ChangePasswordScreen();
             this.changePasswordScreen.closed.listen(() => {
@@ -312,6 +320,8 @@ export const EditorScreen = (function () {
             });
             this.versionText.parentTo(this);
 
+            this.currentPost = false;
+
             this.setupListeners();
         }
         
@@ -328,7 +338,13 @@ export const EditorScreen = (function () {
         isModalOpen () {
             return this.loadScreen.visible || this.saveScreen.visible
                 || this.signInScreen.visible || this.signUpScreen.visible
-                || this.currentAccountScreen.visible || this.changePasswordScreen.visible;
+                || this.currentAccountScreen.visible || this.changePasswordScreen.visible
+                || this.deleteScreen.visible;
+        }
+
+        clearCurrentPost () {
+            this.currentPost = false;
+            this.saveScreen.clearInputs();
         }
 
         setSequence (sequence) {
@@ -424,6 +440,7 @@ export const EditorScreen = (function () {
                     case EditorButtons.BUTTON_CLEAR:
                         this.spriteEditor.clearPixels();
                         this.refreshPreview();
+                        this.clearCurrentPost();
                         break;    
                     case EditorButtons.BUTTON_UNDO:
                         this.history.undo();
@@ -471,6 +488,7 @@ export const EditorScreen = (function () {
                 }
 
                 this.history.clear();
+                this.clearCurrentPost();
             });
 
             this.modeDropdown.onChoice.listen((choice) => {
@@ -491,9 +509,10 @@ export const EditorScreen = (function () {
                 }
 
                 this.history.clear();
+                this.clearCurrentPost();
             });
 
-            this.loadScreen.onSelect.listen((isAnimatedTexture, size, objectData) => {                
+            this.loadScreen.onSelect.listen((isAnimatedTexture, size, objectData, post) => { 
                 if (isAnimatedTexture) {
                     this.spriteEditor.resetPixels();
                     this.sizeDropdown.setCurrentChoice(`${size.x} x ${size.y}`);
@@ -508,6 +527,14 @@ export const EditorScreen = (function () {
                 }
 
                 this.history.clear();
+                this.clearCurrentPost();
+
+                if (post !== undefined) {
+                    this.saveScreen.nameEnter.text = post.postName;
+                    this.saveScreen.typeDropdown.setCurrentChoice(post.type);
+                    this.saveScreen.tagsEnter.text = post.tags;
+                    this.currentPost = true;
+                }
             });
         }
     }

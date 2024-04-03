@@ -159,6 +159,7 @@ export const ArtEditor = (function () {
 
             const urlParams = new URLSearchParams(window.location.search);
             const temporarySigninToken = urlParams.get('tst');
+            const resetCode = urlParams.get('code');
 
             if (temporarySigninToken !== null) {
                 const user = await Auth.me(temporarySigninToken);
@@ -167,8 +168,10 @@ export const ArtEditor = (function () {
                     this.user = user;
                     Auth.setCookie('jwt', Auth.encodeUser(user), 1);
                     this.editorScreen.onUserLogin(user);
+
                     this.editorScreen.currentAccountScreen.visible = false;
-                    this.editorScreen.changePasswordScreen.visible = true;
+                    this.editorScreen.resetPasswordScreen.setResetCode(resetCode);
+                    this.editorScreen.resetPasswordScreen.visible = true;
                 }
             }
 

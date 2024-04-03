@@ -3,10 +3,11 @@ import { Vector2 } from '../../utils/vector2.js';
 import { UIBase } from '../uiBase.js';
 import { UIText } from '../uiText.js';
 import { RotMGSprite } from './rotmgSprite.js';
+import { DeleteScreen } from '../screens/deleteScreen.js';
 
 export const SpriteCell = (function () {
     return class SpriteCell extends UIBase {
-        constructor (object, options) {
+        constructor (postOrObject, options) {
             super({
                 backgroundColor: '#ffffff',
                 transparency: 0.25,
@@ -18,8 +19,13 @@ export const SpriteCell = (function () {
                 ...options
             });
 
-            this.object = object;
-            this.isOwner = object.ownerId !== null && object.ownerId === ArtEditor.ownerId;
+            this.postOrObject = postOrObject;
+            
+            if (ArtEditor.user !== null) {
+                this.isOwner = postOrObject.ownerId !== null && postOrObject.ownerId === ArtEditor.user.details.userId;
+            } else {
+                this.isOwner = false;
+            }
 
             this.deleteButton = new RotmgButtonBorder('X', {
                 size: new Vector2(18, 18),
@@ -35,13 +41,18 @@ export const SpriteCell = (function () {
                 borderColor: '#888888',
                 borderRadius: 5,
                 clipChildren: true,
-                visible: this.isOwner
+                visible: false,
+                zIndex: 10
             });
 
+            this.absorb = false;
             this.deleteButton.parentTo(this);
 
-            this.deleteButton.mouseUp.listen(() => {
-                this.visible = false;
+            this.deleteButton.mouseDown.listen((pos, mouse) => {
+                this.absorb = true;
+                mouse.mouseUp.listenOnce(() => {
+                    setTimeout(() => this.absorb = false);
+                });
             });
 
             this.mouseEnter.listen(() => {
@@ -54,8 +65,9 @@ export const SpriteCell = (function () {
                 this.deleteButton.visible = false;
             });
 
-            const frames = object.getTextureFrames();
-            const textureSize = object.isLoaded ? object.getTextureRect()[1] : Vector2.zero;
+            // console.log(object)
+            const frames = postOrObject.getTextureFrames();
+            const textureSize = postOrObject.isLoaded ? postOrObject.getTextureRect()[1] : Vector2.zero;
 
             this.sprite = new RotMGSprite(textureSize, {
                 frames: frames,
@@ -76,7 +88,7 @@ export const SpriteCell = (function () {
                 }, 200);
             }
 
-            this.spriteLabel = new UIText(object.objectId.replace(/ /g, ''), {
+            this.spriteLabel = new UIText(postOrObject.objectId.replace(/ /g, ''), {
                 positionScale: new Vector2(0.5, 1),
                 sizeScale: new Vector2(1, 0),
                 pivot: new Vector2(0.5, 1),

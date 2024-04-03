@@ -64,7 +64,6 @@ export const RotMGSpriteLoader = (function () {
         query (tags, type) {
             if (this.pages.length === 0) this.initializePages();
             let resultObjects = [];
-            const pages = [];
 
             this.pages.forEach((page) => {
                 const matches = page.query(tags, type);
@@ -76,19 +75,7 @@ export const RotMGSpriteLoader = (function () {
                 }
             });
 
-            const totalPages = Math.ceil(resultObjects.length / this.pageSize);
-    
-            for (let i = 0; i < totalPages; i++) {
-                const startIndex = i * this.pageSize;
-                const endIndex = startIndex + this.pageSize;
-                
-                const objects = resultObjects.slice(startIndex, endIndex);
-                const page = new Page(i, objects, false);
-
-                pages.push(page);
-            }
-
-            return pages;
+            return resultObjects;
         }
     }
 })();

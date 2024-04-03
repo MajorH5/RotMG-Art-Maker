@@ -99,11 +99,11 @@ export const CurrentAccountScreen = (function () {
                 textXAlignment: 'left',
                 fontSize: 14,
                 font: 'myriadpro_light',
-                fontColor: '#ffffff',
+                fontColor: '#B3B3B3',
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.bindHover(this.notVerified, '#ffda84', '#ffffff');
+            this.bindHover(this.notVerified, '#ffda84', '#B3B3B3');
             this.notVerified.mouseUp.listen(() => {
                 if (ArtEditor.user === null) return;
                 
@@ -149,11 +149,11 @@ export const CurrentAccountScreen = (function () {
                 textXAlignment: 'left',
                 fontSize: 14,
                 font: 'myriadpro_light',
-                fontColor: '#ffffff',
+                fontColor: '#B3B3B3',
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.bindHover(this.changePassword, '#ffda84', '#ffffff');
+            this.bindHover(this.changePassword, '#ffda84', '#B3B3B3');
             this.changePassword.parentTo(this.modal);
 
             this.notYou = new UIText('Not you? Click here to log out', {
@@ -162,11 +162,11 @@ export const CurrentAccountScreen = (function () {
                 textXAlignment: 'left',
                 fontSize: 14,
                 font: 'myriadpro_light',
-                fontColor: '#ffffff',
+                fontColor: '#B3B3B3',
                 shadow: true,
                 shadowBlur: 3,
             });
-            this.bindHover(this.notYou, '#ffda84', '#ffffff');
+            this.bindHover(this.notYou, '#ffda84', '#B3B3B3');
             this.notYou.parentTo(this.modal);
 
             this.incorrect = new UIText('Error', {

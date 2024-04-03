@@ -12,6 +12,9 @@ import { UIBase } from "../uiBase.js";
 import { UIText } from "../uiText.js";
 import { PackagedSequence } from "../../utils/packagedSequence.js";
 import { Event } from "../../utils/event.js";
+import { Query } from "../../utils/query.js";
+import { Posts } from "../../api/posts.js";
+import { Post } from "../../utils/post.js";
 
 export const LoadScreen = (function () {
     return class LoadScreen extends UIBase {
@@ -180,36 +183,29 @@ export const LoadScreen = (function () {
                 fontSize: 20,
                 shadow: true,
                 shadowBlur: 4,
+                visible: false,
                 fontColor: '#bbbbbb'
             });
             this.pageCounter.parentTo(this.modal);
 
             this.cellsX = 5;
             this.cellsY = 3;
-
+            
             this.spriteLoader = new RotMGSpriteLoader(this.cellsX * this.cellsY);
             this.currentSearchPage = null;
             this.currentIndex = 0
+            this.totalPages = 0;
+            this.isSearching = false;
+            this.blanked = false;
 
-            this.searchButton.mouseUp.listen(() => this.queryObjects(this.searchBox.text));
-            this.searchBox.submit.listen(() => this.queryObjects(this.searchBox.text));
+            this.searchButton.mouseUp.listen(() => this.loadPage(0));
+            this.searchBox.submit.listen(() => this.loadPage(0));
 
             this.onSelect = new Event();
 
             setTimeout(() => {
                 this.loadPage(0);
             }, 1000)
-        }
-
-        queryObjects (query) {
-            if (query.length > 0)  {
-                const pages = this.spriteLoader.query(query);
-                this.currentSearchPage = pages;
-            } else {
-                this.currentSearchPage = null;
-            }
-
-            this.loadPage(0);
         }
 
         loadObject (object, index) {
@@ -229,9 +225,24 @@ export const LoadScreen = (function () {
             cell.positionAbsolute = cellPosition;
             cell.parentTo(this.cells);
 
+            cell.deleteButton.mouseUp.listen(() => {
+                const deleteScreen = ArtEditor.editorScreen.deleteScreen;
+                deleteScreen.postName.text = `"${object.postName}"`;
+                deleteScreen.visible = true;
+
+                deleteScreen.bindDelete(async () => {
+                    if (ArtEditor.user === null) return;
+
+                    await Posts.deletePost(object.postId, ArtEditor.user.token);
+                    await this.loadPage(this.currentIndex);
+                });
+            });
+
             cell.mouseUp.listen(() => {
+                if (cell.absorb) return;
                 if (this.sourceDropdown.isOpen()) return;
                 if (this.typeDropdown.isOpen()) return;
+                if (ArtEditor.editorScreen.deleteScreen.visible) return;
                 
                 const [, rectSize] = object.getTextureRect();
                 const frames = object.getTextureFrames();
@@ -243,37 +254,59 @@ export const LoadScreen = (function () {
                     objectData = frames[0].pixels;
                 }
 
-                this.onSelect.trigger(object.isAnimatedTexture, rectSize, objectData);
+                if (object instanceof Post) {
+                    this.onSelect.trigger(object.isAnimatedTexture, rectSize, objectData, object);
+                } else {
+                    this.onSelect.trigger(object.isAnimatedTexture, rectSize, objectData);
+                }
                 this.visible = false;
             });
         }
 
         async loadPage (pageIndex) {
             if (!this.spriteLoader.isLoaded()) await this.spriteLoader.waitLoad();
+            if (this.isSearching) return;
+
+            this.isSearching = true;
             
             this.cells.clearChildren();
 
-            const totalPages = this.currentSearchPage !== null ?
-                this.currentSearchPage.length : this.spriteLoader.getTotalPages();
-            pageIndex %= totalPages;
+            this.loadingLabel.text = 'Loading...';
+            this.loadingLabel.visible = true;
 
-            this.currentIndex = pageIndex;
-            
-            let page = this.spriteLoader.getPage(pageIndex);
-            
-            if (this.currentSearchPage !== null) {
-                page = this.currentSearchPage.at(pageIndex);
+            const tags = this.searchBox.text.split(',').filter((tag) => tag.trim());
+            const type = this.typeDropdown.currentChoice;
+            const source = this.sourceDropdown.currentChoice;
+
+            if (source === 'Mine' && ArtEditor.user === null) {
+                this.visible = false;
+                ArtEditor.editorScreen.signInScreen.visible = true;
+                this.isSearching = false;
+                this.loadingLabel.visible = false;
+                return;
             }
 
-            if (page === undefined) {
+            let [page, totalPages] = await Query.search(source, type, tags, pageIndex);
+
+            this.previous.visible = totalPages > 1 && page.pageIndex !== 0;
+            this.next.visible = totalPages > 1 && page.pageIndex !== totalPages - 1;
+
+            if (totalPages === 0) {
                 this.loadingLabel.text = 'No results found';
                 this.loadingLabel.visible = true;
-                this.pageCounter.visible = false;
+                // this.pageCounter.visible = false;
+                this.isSearching = false;
                 return;
             }
             
-            this.pageCounter.visible = true;
-            this.loadingLabel.text = 'Loading...';
+            this.totalPages = totalPages;
+
+            pageIndex %= this.totalPages;
+
+            this.currentIndex = pageIndex;
+            
+            
+            // this.pageCounter.visible = true;
             this.loadingLabel.visible = !page.isLoaded;
 
             await page.load();
@@ -285,7 +318,10 @@ export const LoadScreen = (function () {
             this.pageCounter.text = `Page ${pageActual} of ${totalPages}`;
 
             this.loadingLabel.visible = false;
+
             page.objects.forEach((object, index) => this.loadObject(object, index));
+
+            this.isSearching = false;
         }
     }
 })();

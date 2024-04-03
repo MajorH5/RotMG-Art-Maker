@@ -44,6 +44,42 @@ export const Object = (function () {
             });
         }
 
+        isType (type) {
+            if (type === 'Any Type') {
+                return true;
+            }
+
+            const lookup = {
+                'Equipment': 'Items',
+                'Character': 'Entities',
+                'GameObject': 'Objects',
+                'Pet': 'Character',
+                'ConnectedWall': 'Tiles',
+                'Wall': 'Tiles',
+                'Portal': 'Objects',
+                'SpiderWeb': 'Tiles',
+                'Player': 'Character',
+                'CaveWall': 'Tiles',
+                'Projectile': 'Objects',
+                'CharacterChanger': 'Objects',
+                'YardUpgrader': 'Objects',
+                'ReskinVendor': 'Objects',
+                'GuildBoard': 'Objects',
+                'GuildChronicle': 'Objects',
+                'Stalagmite': 'Tiles',
+                'Sign': 'Objects',
+                'Dye': 'Items',
+                'ClosedVaultChest': 'Objects',
+            }
+
+            if (lookup[this.objectClass] === undefined) {
+                // console.warn('Object.isType: Unrecognized object class', this.objectClass)
+                return false;
+            }
+
+            return lookup[this.objectClass] === type;
+        }
+
         parseTextureIndex(rawIndex) {
             const isHex = rawIndex.includes('x');
             return parseInt(rawIndex, isHex ? 16 : 10);
@@ -57,7 +93,7 @@ export const Object = (function () {
             // don't ask why, just know it works.
 
             formedUrl = formedUrl.replace('Embed', '');
-            formedUrl = formedUrl.replace('new', '');
+            formedUrl = formedUrl.replace('new', 'b');
             formedUrl = formedUrl.replace('skins', 'sSkins');
 
             if (rawTextureUrl.includes('chars') && rawTextureUrl.indexOf('chars') !== 0) {

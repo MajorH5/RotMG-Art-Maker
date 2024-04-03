@@ -19,6 +19,10 @@ export const Auth = (function () {
             return API.post('/reset-password', { email });
         }
 
+        static async setPassword (token, password, code) {
+            return API.post('/set-password', { token, password, code });
+        }
+
         static async changePassword (token, currentPassword, newPassword) {
             return API.post('/change-password', { token, currentPassword, newPassword });
         }
