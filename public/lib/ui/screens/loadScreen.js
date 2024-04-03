@@ -73,7 +73,7 @@ export const LoadScreen = (function () {
             this.typeDropdown = new UIDropdownMenu({
                 position: new Vector2(185.5, 50.5),
     
-                choices: ['Any Type', 'Items', 'Entities', 'Tiles', 'Objects'],
+                choices: ['Any Type', 'Items', 'Entities', 'Tiles', 'Objects', 'Misc'],
                 defaultChoice: 'Any Type'
             });
             this.typeDropdown.parentTo(this.modal);
