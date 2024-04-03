@@ -11,6 +11,7 @@ export const Constants = (function () {
     return {
         DEV_ENVIRONMENT: DEV_ENVIRONMENT,
         MOBILE_ENVIRONMENT: IS_MOBILE,
+        RESOURCES_URL: 'https://static.drips.pw',
         ORIGIN: DEV_ENVIRONMENT ? "http://localhost" : "https://realmspriter.com",
         DEFAULT_CANVAS_SIZE: new Vector2(880, 700),
     }

@@ -3,7 +3,7 @@ import { Constants } from "../../utils/constants.js";
 
 export const RotMGSpriteLoader = (function () {
     return class RotMGSpriteLoader {
-        static OBJECTS_JSON_URL = Constants.ORIGIN + '/Objects.json';
+        static OBJECTS_JSON_URL = Constants.RESOURCES_URL + '/rotmg/production/current/json/Objects.json';
         static globalObjects = null;
         static objecLoadPromise = null;   
 

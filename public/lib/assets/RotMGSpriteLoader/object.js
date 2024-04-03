@@ -1,9 +1,10 @@
+import { Constants } from "../../utils/constants.js";
 import { Vector2 } from "../../utils/vector2.js";
 import { Sprite } from "../sprite.js";
 
 export const Object = (function () {
     return class Object {
-        static BASE_TEXTURES_URL = 'https://static.drips.pw/rotmg/production/current/sheets/';
+        static BASE_TEXTURES_URL = Constants.RESOURCES_URL + '/rotmg/production/current/sheets/';
         static CLASS_CHARACTER = 'Character';
 
         constructor(rawTextureUrl, rawTextureIndex, objectId, displayId, objectClass, isAnimatedTexture, ownerId = null) {
