@@ -54,6 +54,8 @@ export const Query = (function () {
         static async search (domain, type, tags, pageIndex = 0) {
             const OBJECTS_PER_PAGE = 15;
 
+            domain = arguments[0];
+
             if (domain === 'Deca') {
                 const objects = ArtEditor.editorScreen.loadScreen.spriteLoader.query(tags, type);
                 const pages = Query.divideObjects(objects, 15);
