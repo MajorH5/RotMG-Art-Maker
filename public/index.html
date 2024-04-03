@@ -18,11 +18,13 @@
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
 
 <body>
-    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <div id="canvas-container">
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    </div>
     <script src="index.js" type="module"></script>
     <p style="text-align: center; color: white">To report issues or give feedback email us at <a href="mailto:feedback@realmspriter.com">
         feedback@realmspriter.com</a>.</p>
-    <footer>
+    <div class="footer">
         <div>
             <a href="legal/terms-of-use" target="_blank">Terms of Use</a> |
             <a href="legal/privacy-policy" target="_blank">Privacy Policy</a>
@@ -30,7 +32,7 @@
         <div class="copyright">
             &copy; 2024 RealmSpriter. All rights reserved.
         </div>
-    </footer>
+    </div>
 </body>
 
 </html>
