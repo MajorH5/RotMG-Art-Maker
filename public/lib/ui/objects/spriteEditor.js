@@ -152,14 +152,26 @@ export const SpriteEditor = (function () {
 
         clearPixels () {
             // store the clear action in the history
+            let hasValues = false;
             for (let y = 0; y < this.spriteSize.y; y++) {
                 for (let x = 0; x < this.spriteSize.x; x++) {
-                    const pixel = this.pixels[y][x];
-                    this.history.update(SpriteEditor.HISTORY_PIXEL_EDIT, {
-                        from: pixel.getAttribute('color'),
-                        to: null,
-                        pixel: pixel
-                    });
+                    if (this.pixels[y][x].getAttribute('color') !== null) {
+                        hasValues = true;
+                    }
+                }
+            }
+
+            if (hasValues) {
+                this.history.close();
+                for (let y = 0; y < this.spriteSize.y; y++) {
+                    for (let x = 0; x < this.spriteSize.x; x++) {
+                        const pixel = this.pixels[y][x];
+                        this.history.update(SpriteEditor.HISTORY_PIXEL_EDIT, {
+                            from: null,
+                            to: pixel.getAttribute('color'),
+                            pixel: pixel
+                        });
+                    }
                 }
             }
 
