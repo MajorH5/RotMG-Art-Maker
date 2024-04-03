@@ -208,7 +208,7 @@ export const LoadScreen = (function () {
             this.onSelect = new Event();
 
             setTimeout(() => {
-                // this.loadPage(0);
+                this.loadPage(0);
             }, 1000)
         }
 
