@@ -151,18 +151,6 @@ export const SpriteEditor = (function () {
         }
 
         clearPixels () {
-            for (let y = 0; y < this.spriteSize.y; y++) {
-                for (let x = 0; x < this.spriteSize.x; x++) {
-                    const pixel = this.pixels[y][x];
-                    pixel.backgroundEnabled = false;
-                    pixel.setAttribute('color', null);
-                }
-            }
-
-            if (this.frame !== null) {
-                this.frame.clear();
-            }
-
             // store the clear action in the history
             for (let y = 0; y < this.spriteSize.y; y++) {
                 for (let x = 0; x < this.spriteSize.x; x++) {
@@ -173,6 +161,18 @@ export const SpriteEditor = (function () {
                         pixel: pixel
                     });
                 }
+            }
+
+            for (let y = 0; y < this.spriteSize.y; y++) {
+                for (let x = 0; x < this.spriteSize.x; x++) {
+                    const pixel = this.pixels[y][x];
+                    pixel.backgroundEnabled = false;
+                    pixel.setAttribute('color', null);
+                }
+            }
+
+            if (this.frame !== null) {
+                this.frame.clear();
             }
         }
 
