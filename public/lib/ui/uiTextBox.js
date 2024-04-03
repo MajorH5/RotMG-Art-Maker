@@ -1,5 +1,6 @@
 // class for basic functioning of text box
 
+import { Constants } from "../utils/constants.js";
 import { Event } from "../utils/event.js";
 import { Vector2 } from "../utils/vector2.js";
 import { UIText } from "./uiText.js";
@@ -276,6 +277,10 @@ export const UITextBox = (function () {
             this.lastCursorFlash = Date.now();
 
             UITextBox.current = this;
+
+            if (Constants.MOBILE_ENVIRONMENT && "virtualKeyboard" in navigator) {
+                navigator.virtualKeyboard.show();
+            }
         }
 
         blur() {
@@ -287,6 +292,10 @@ export const UITextBox = (function () {
 
             this.selectionStart = 0;
             this.selectionEnd = 0;
+
+            if (Constants.MOBILE_ENVIRONMENT && "virtualKeyboard" in navigator) {
+                navigator.virtualKeyboard.show();
+            }
         }
 
         positionToIndex(position) {

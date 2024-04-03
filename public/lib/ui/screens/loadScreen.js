@@ -198,8 +198,12 @@ export const LoadScreen = (function () {
             this.isSearching = false;
             this.blanked = false;
 
-            this.searchButton.mouseUp.listen(() => this.loadPage(0));
-            this.searchBox.submit.listen(() => this.loadPage(0));
+            this.currentQuery = '';
+            this.currentType = 'Any Type';
+            this.currentSource = 'Deca';
+
+            this.searchButton.mouseUp.listen(() => this.query());
+            this.searchBox.submit.listen(() => this.query());
 
             this.onSelect = new Event();
 
@@ -263,6 +267,13 @@ export const LoadScreen = (function () {
             });
         }
 
+        query () {
+            this.currentQuery = this.searchBox.text;
+            this.currentType = this.typeDropdown.currentChoice;
+            this.currentSource = this.sourceDropdown.currentChoice;
+            return this.loadPage(0);
+        }
+
         async loadPage (pageIndex) {
             if (!this.spriteLoader.isLoaded()) await this.spriteLoader.waitLoad();
             if (this.isSearching) return;
@@ -274,9 +285,9 @@ export const LoadScreen = (function () {
             this.loadingLabel.text = 'Loading...';
             this.loadingLabel.visible = true;
 
-            const tags = this.searchBox.text.split(',').filter((tag) => tag.trim());
-            const type = this.typeDropdown.currentChoice;
-            const source = this.sourceDropdown.currentChoice;
+            const tags = this.currentQuery.split(',').filter((tag) => tag.trim());
+            const type = this.currentType;
+            const source = this.currentSource;
 
             if (source === 'Mine' && ArtEditor.user === null) {
                 this.visible = false;
