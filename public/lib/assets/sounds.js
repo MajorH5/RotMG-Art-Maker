@@ -189,11 +189,13 @@ export const Sounds = (function () {
         // suspends both the music and sfx context
         static suspendAudioContext () {
             Sounds.musicContext.suspend();
+            Sounds.sfxContext.suspend();
         }
 
         // resume the music and sfx context
         static resumeAudioContext () {
             Sounds.musicContext.resume();
+            Sounds.sfxContext.resume()
         }
 
         // toggles the audio objects which match

@@ -63,6 +63,8 @@ export const UIManager = (function () {
                         this.mouses.splice(this.mouses.indexOf(mouse), 1);
                     }
                 }
+
+                Sounds.resumeAudioContext();
             });
 
             canvas.addEventListener('wheel', (event) => {
