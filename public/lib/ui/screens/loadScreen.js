@@ -297,6 +297,7 @@ export const LoadScreen = (function () {
                 return;
             }
 
+            console.log(Query)
             let [page, totalPages] = await Query.search(source, type, tags, pageIndex);
 
             this.previous.visible = totalPages > 1 && page.pageIndex !== 0;
