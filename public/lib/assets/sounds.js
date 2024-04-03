@@ -6,10 +6,10 @@ export const Sounds = (function () {
         static sfxContext = new AudioContext();
         static musicContext = new AudioContext();
 
-        static SND_BUTTON_CLICK = new AudioSource('/assets/sounds/button_click.ogg', Sounds.sfxContext);
-        static SND_ERROR = new AudioSource('/assets/sounds/error.ogg', Sounds.sfxContext);
+        static SND_BUTTON_CLICK = new AudioSource('/assets/sounds/button_click.mp3', Sounds.sfxContext);
+        static SND_ERROR = new AudioSource('/assets/sounds/error.mp3', Sounds.sfxContext);
         
-        static SND_THEME = new AudioSource('/assets/sounds/sorc.ogg', Sounds.musicContext);
+        static SND_THEME = new AudioSource('/assets/sounds/sorc.mp3', Sounds.musicContext);
 
         static GLOBAL_VOLUME = 1;
 
