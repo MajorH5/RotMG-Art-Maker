@@ -335,11 +335,15 @@ export const EditorScreen = (function () {
             // be updated by the current animation frame
         }
 
+        getModals () {
+            return [this.loadScreen, this.saveScreen,
+                this.signInScreen, this.signUpScreen,
+                this.currentAccountScreen, this.changePasswordScreen,
+                this.deleteScreen, this.resetPasswordScreen, this.forgotPasswordScreen];
+            }
+
         isModalOpen () {
-            return this.loadScreen.visible || this.saveScreen.visible
-                || this.signInScreen.visible || this.signUpScreen.visible
-                || this.currentAccountScreen.visible || this.changePasswordScreen.visible
-                || this.deleteScreen.visible;
+            return this.getModals().some((modal) => modal.visible);
         }
 
         clearCurrentPost () {
@@ -401,6 +405,7 @@ export const EditorScreen = (function () {
             if (this.sequence === null) return;
 
             this.spriteEditor.setFrame(this.sequence.get(frame));
+            this.history.clear();
         }
 
         setupListeners () {

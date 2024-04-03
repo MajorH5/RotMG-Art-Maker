@@ -141,6 +141,7 @@ By selecting "I Understand", you acknowledge that you have read and understood t
             this.understand.mouseUp.listen(() => {
                 this.visible = false;
                 Sounds.playTheme(Sounds.SND_THEME);
+                ArtEditor.performKeybinds();
             });
         }
     }

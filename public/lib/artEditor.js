@@ -77,27 +77,6 @@ export const ArtEditor = (function () {
             this.canvas.height = Constants.DEFAULT_CANVAS_SIZE.y;
             this.lastFrame = performance.now();
 
-            document.addEventListener('keydown', (event) => {
-                if (UITextBox.current !== null) return; // absorb key events if a text box is active
-                
-                const key = event.key.toLowerCase();
-
-                switch (key) {
-                    case 'd':
-                        this.editorScreen.spriteEditor.setMode(SpriteEditor.DRAW);
-                        this.editorScreen.editorButtons.setButtonActive(EditorButtons.BUTTON_DRAW);
-                        break;
-                    case 'e':
-                        this.editorScreen.spriteEditor.setMode(SpriteEditor.ERASE);
-                        this.editorScreen.editorButtons.setButtonActive(EditorButtons.BUTTON_ERASE);
-                        break;
-                    case 'a':
-                        this.editorScreen.spriteEditor.setMode(SpriteEditor.SAMPLE);
-                        this.editorScreen.editorButtons.setButtonActive(EditorButtons.BUTTON_SAMPLE);
-                        break;
-                }
-            })
-
             await this.preloadAll();
 
             this.mute = new UIImage(Sprite.IMG_ICONS, {
@@ -177,6 +156,60 @@ export const ArtEditor = (function () {
 
             this.initialized = true;
             this.initializing = false;
+        }
+
+        performKeybinds () {
+            document.addEventListener('keydown', (event) => {
+                if (UITextBox.current !== null) return; // absorb key events if a text box is active
+                
+                const key = event.key.toLowerCase();
+
+                switch (key) {
+                    case 'd':
+                        this.editorScreen.spriteEditor.setMode(SpriteEditor.DRAW);
+                        this.editorScreen.editorButtons.setButtonActive(EditorButtons.BUTTON_DRAW);
+                        break;
+                    case 'e':
+                        this.editorScreen.spriteEditor.setMode(SpriteEditor.ERASE);
+                        this.editorScreen.editorButtons.setButtonActive(EditorButtons.BUTTON_ERASE);
+                        break;
+                    case 'a':
+                        this.editorScreen.spriteEditor.setMode(SpriteEditor.SAMPLE);
+                        this.editorScreen.editorButtons.setButtonActive(EditorButtons.BUTTON_SAMPLE);
+                        break;
+                    case 'u':
+                        this.editorScreen.history.undo();
+                        this.editorScreen.refreshPreview();
+                        break;
+                    case 'r':
+                        this.editorScreen.history.redo();
+                        this.editorScreen.refreshPreview();
+                        break;
+                    case 'c':
+                        this.editorScreen.spriteEditor.clearPixels();
+                        this.editorScreen.refreshPreview();
+                        this.editorScreen.clearCurrentPost();
+                        break;
+                    case 's':
+                        if (this.editorScreen.resetPasswordScreen.visible) return;
+                        this.editorScreen.saveScreen.visible = !this.editorScreen.saveScreen.visible;
+                        this.getModals().forEach(modal => {
+                            if (modal !== this.editorScreen.saveScreen) {
+                                modal.visible = false;
+                            }
+                        });
+                        break;
+                    case 'l':
+                        if (this.editorScreen.resetPasswordScreen.visible) return;
+                        this.editorScreen.loadScreen.visible = !this.editorScreen.loadScreen.visible;
+                        this.getModals().forEach(modal => {
+                            if (modal !== this.editorScreen.loadScreen) {
+                                modal.visible = false;
+                            }
+                        });
+                        break;
+                }
+            });
         }
 
         async preloadAll () {
@@ -291,8 +324,11 @@ export const ArtEditor = (function () {
         }
 
         isModalOpen () {
-            return this.welcomeScreen.visible || this.editorScreen.isModalOpen()
-                || this.legalScreen.visible;
+            return this.getModals().some(modal => modal.visible);
+        }
+
+        getModals () {
+            return [this.welcomeScreen, this.legalScreen, ...this.editorScreen.getModals()];
         }
     }
 })()

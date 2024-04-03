@@ -48,6 +48,11 @@ export const SpriteEditor = (function () {
                             pixel.setAttribute('color', to);
                         }
 
+                        if (this.frame !== null) {
+                            const position = pixel.getAttribute('position');
+                            this.frame.set(position, pixel.getAttribute('color'));
+                        }
+
                         event.from = to;
                         event.to = from;
                     }
@@ -189,7 +194,8 @@ export const SpriteEditor = (function () {
                 sizeScale: Vector2.one,
                 positionScale: new Vector2(0.5, 0.5),
                 pivot: new Vector2(0.5, 0.5),
-                size: new Vector2(-1, -1)
+                size: new Vector2(-1, -1),
+                visible: this.mode === SpriteEditor.DRAW
             });
             hover.parentTo(pixel);
 
