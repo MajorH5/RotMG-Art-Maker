@@ -51,6 +51,11 @@ export const PackagedSequence = (function () {
             packagedSequence.attack2 = new Frame(new Vector2(size.x * 2, size.y));
             packagedSequence.attack2.pixels = PackagedSequence.convertUInt8ArrayToHex(frames[4].pixels, size.x * 2);
 
+            packagedSequence.walk1.link(packagedSequence.stand, packagedSequence.walk1.compare(packagedSequence.stand));
+            packagedSequence.walk2.link(packagedSequence.stand, packagedSequence.walk2.compare(packagedSequence.stand));
+            packagedSequence.attack1.link(packagedSequence.stand, packagedSequence.attack1.compare(packagedSequence.stand));
+            packagedSequence.attack2.link(packagedSequence.stand, packagedSequence.attack2.compare(packagedSequence.stand));
+            
             return packagedSequence;
         }
 
@@ -69,9 +74,14 @@ export const PackagedSequence = (function () {
 
             packagedSequence.attack1 = new Frame(json.size);
             packagedSequence.attack1.pixels = PackagedSequence.decompress(json.attack1, json.size.x, json.size.y);
-
+            
             packagedSequence.attack2 = new Frame(new Vector2(json.size.x * 2, json.size.y));
             packagedSequence.attack2.pixels = PackagedSequence.decompress(json.attack2, json.size.x * 2, json.size.y);
+            
+            packagedSequence.walk1.link(packagedSequence.stand, packagedSequence.walk1.compare(packagedSequence.stand));
+            packagedSequence.walk2.link(packagedSequence.stand, packagedSequence.walk2.compare(packagedSequence.stand));
+            packagedSequence.attack1.link(packagedSequence.stand, packagedSequence.attack1.compare(packagedSequence.stand));
+            packagedSequence.attack2.link(packagedSequence.stand, packagedSequence.attack2.compare(packagedSequence.stand));
 
             return packagedSequence;
         }

@@ -70,6 +70,11 @@ export const SpriteEditor = (function () {
 
         setFrame (frame) {
             this.setSpriteSize(frame.size);
+
+            
+            if (frame.isDirty()) {
+                frame.unify();
+            }
             
             for (let y = 0; y < frame.size.y; y++) {
                 for (let x = 0; x < frame.size.x; x++) {

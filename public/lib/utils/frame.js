@@ -10,6 +10,7 @@ export const Frame = (function () {
             this.childLinks = [];
 
             this.cachedImage = null;
+            this.dirty = false;
 
             for (let y = 0; y < size.y; y++) {
                 this.pixels[y] = [];
@@ -20,15 +21,27 @@ export const Frame = (function () {
             }
         }
         
-        link (frame) {
-            this.parentLink = frame;
-            frame.childLinks.push(this);
+        link (frame, isActive = true) {
+            // TODO: when new parent is linked, unlink from old parent children links
+
+            this.parentLink = frame === undefined ? this.parentLink : frame;
+
+            const index = this.parentLink.childLinks.findIndex(link => link.target === this);
+
+            if (index !== -1) {
+                this.parentLink.childLinks[index].active = isActive;
+            } else {
+                this.parentLink.childLinks.push({
+                    target: this,
+                    active: isActive
+                });
+            }
         }
 
         unlink () {
             if (this.parentLink !== null) {
-                const index = this.parentLink.childLinks.indexOf(this);
-                this.parentLink.childLinks.splice(index, 1);
+                const link = this.parentLink.childLinks.find(link => link.target === this);
+                link.active = false;
             }
         }
 
@@ -40,10 +53,12 @@ export const Frame = (function () {
             this.pixels[position.y][position.x] = value;
 
             this.childLinks.forEach(link => {
-                link.set(position, value, true);
+                if (!link.active) return;
+                link.target.set(position, value, true);
             });
 
             this.cachedImage = null;
+            this.dirty = false;
         }
 
         get (position) {
@@ -57,6 +72,41 @@ export const Frame = (function () {
                 }
             }
             this.cachedImage = null;
+            this.dirty = true;
+            this.link();
+        }
+
+        unify () {
+            const parent = this.getParent();
+
+            for (let y = 0; y < this.size.y; y++) {
+                for (let x = 0; x < this.size.x; x++) {
+                    const color = parent.get(new Vector2(x, y));
+                    this.set(new Vector2(x, y), color, true);
+                }
+            }
+
+            this.dirty = false;
+        }
+
+        compare (frame) {
+            for (let y = 0; y < this.size.y; y++) {
+                for (let x = 0; x < this.size.x; x++) {
+                    if (this.get(new Vector2(x, y)) !== frame.get(new Vector2(x, y))) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+        
+        isDirty () {
+            return this.dirty;
+        }
+
+        getParent () {
+            return this.parentLink;
         }
 
         getPixels () {
