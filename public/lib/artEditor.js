@@ -283,15 +283,18 @@ export const ArtEditor = (function () {
         }
 
         async login (email, password) {
-            const result = await Auth.signIn(email, password);
+            return Auth.signIn(email, password).then((result) => {
+                if (result.error === undefined) {
+                    this.user = result;
+                    Auth.setCookie('jwt', Auth.encodeUser(result), 1);
+                    this.editorScreen.onUserLogin(result);
+                }
 
-            if (result.error === undefined) {
-                this.user = result;
-                Auth.setCookie('jwt', Auth.encodeUser(result), 1);
-                this.editorScreen.onUserLogin(result);
-            }
-
-            return result;
+                return result;
+            }).catch((error) => {
+                console.error('Error logging in:', error);
+                return { error: 'An error occurred. Please try again later.'};
+            });
         }
 
         async logout () {
@@ -299,13 +302,17 @@ export const ArtEditor = (function () {
                 return;
             }
 
-            const result = await Auth.signOut(this.user.token);
-            
-            this.editorScreen.onUserLogout();
-            this.user = null;
-            Auth.eraseCookie('jwt');
-
-            return result;
+            return Auth.signOut(this.user.token).then((result) => {
+                return result;
+            }).catch((error) => {
+                console.error('Error logging out:', error);
+                return { error: 'An error occurred. Please try again later.'};
+            }).finally((result) => {
+                this.user = null;
+                Auth.eraseCookie('jwt');
+                this.editorScreen.onUserLogout();
+                return result;
+            });
         }
 
         async register (username, email, password) {
@@ -313,14 +320,17 @@ export const ArtEditor = (function () {
                 await this.logout();
             }
 
-            const result = await Auth.register(username, email, password);
+            return Auth.register(username, email, password).then((result) => {
+                if (result.error === undefined) {
+                    this.user = result;
+                    this.editorScreen.onUserLogin(result);
+                }
 
-            if (result.error === undefined) {
-                this.user = result;
-                this.editorScreen.onUserLogin(result);
-            }
-
-            return result;
+                return result;
+            }).catch((error) => {
+                console.error('Error registering:', error);
+                return { error: 'An error occurred. Please try again later.'};
+            });
         }
 
         isModalOpen () {

@@ -297,7 +297,18 @@ export const LoadScreen = (function () {
                 return;
             }
 
-            let [page, totalPages] = await Query.search(source, type, tags, pageIndex);
+            let page, totalPages;
+
+            try {
+                [page, totalPages] = await Query.search(source, type, tags, pageIndex);
+            } catch (error) {
+                this.loadingLabel.text = 'Error loading';
+                this.loadingLabel.visible = true;
+                this.isSearching = false;
+                this.previous.visible = false;
+                this.next.visible = false;
+                return;
+            }
 
             this.previous.visible = totalPages > 1 && page.pageIndex !== 0;
             this.next.visible = totalPages > 1 && page.pageIndex !== totalPages - 1;

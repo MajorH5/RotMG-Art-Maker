@@ -229,19 +229,27 @@ export const ChangePasswordScreen = (function () {
                 isResetting = true;
 
                 this.incorrect.visible = false;
-                const response = await Auth.changePassword(ArtEditor.user.token, password, newPassword);
 
-                if (response.error === undefined) {
-                    this.visible = false;
-                    this.closed.trigger();
-                    this.clearInputs();
-                } else {
-                    this.incorrect.text = response.error;
+                Auth.changePassword(ArtEditor.user.token, password, newPassword).then((response) => {
+                    if (response.error === undefined) {
+                        this.visible = false;
+                        this.closed.trigger();
+                        this.clearInputs();
+                    } else {
+                        this.incorrect.text = response.error;
+                        this.incorrect.visible = true;
+                        Sounds.playSfx(Sounds.SND_ERROR);
+                    }
+    
+                    isResetting = false;
+                }).catch((error) => {
+                    console.error('Error changing password:', error);
+                    this.incorrect.text = 'An error occurred. Please try again later.'
                     this.incorrect.visible = true;
-                    Sounds.playSfx(Sounds.SND_ERROR);
-                }
+    
+                    isResetting = false;
+                });
 
-                isResetting = false;
             });
             
             this.cancel = new UIText('Cancel', {

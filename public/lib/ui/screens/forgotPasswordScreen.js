@@ -154,13 +154,20 @@ export const ForgotPasswordScreen = (function () {
                 isResetting = true;
 
                 this.incorrect.visible = false;
-                const response = await Auth.resetPassword(email);
-                
-                this.incorrect.text = response.error || response.message || '';
-                this.incorrect.visible = true;
-                this.submit.visible = response.error !== undefined;
-
-                isResetting = false;
+                Auth.resetPassword(email).then((response) => {
+                    this.incorrect.text = response.error || response.message || '';
+                    this.incorrect.visible = true;
+                    this.submit.visible = response.error !== undefined;
+    
+                    isResetting = false;
+                }).catch((error) => {
+                    console.error('Error resetting password:', error);
+                    this.incorrect.text = 'An error occurred. Please try again later.'
+                    this.incorrect.visible = true;
+                    this.submit.visible = true;
+    
+                    isResetting = false;
+                });
             });
             
             this.cancel = new UIText('Cancel', {
