@@ -2,6 +2,7 @@ import { Vector2 } from "../utils/vector2.js";
 import { Sounds } from "../assets/sounds.js";
 import { UITextBox } from "./uiTextBox.js";
 import { Mouse } from "./mouse.js";
+import { Constants } from "../utils/constants.js";
 
 export const UIManager = (function () {
     return class UIManager {
@@ -65,6 +66,16 @@ export const UIManager = (function () {
                 }
 
                 Sounds.resumeAudioContext();
+
+                canvas.blur();
+            });
+
+            canvas.addEventListener('focus', () => {
+                if (UITextBox.current !== null) {
+                    document.getElementById('mobile-inputs').focus();
+                } else {
+                    document.getElementById('mobile-inputs').blur();
+                }
             });
 
             canvas.addEventListener('wheel', (event) => {
@@ -76,7 +87,7 @@ export const UIManager = (function () {
             });
 
             document.addEventListener('keydown', (event) => {
-                if (UITextBox.current !== null) {
+                if (UITextBox.current !== null && !Constants.MOBILE_ENVIRONMENT) {
                     UITextBox.current.handleKeyInput(event);
                 }
             });

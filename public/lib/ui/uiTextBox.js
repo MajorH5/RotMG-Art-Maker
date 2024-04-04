@@ -8,6 +8,8 @@ import { UIText } from "./uiText.js";
 export const UITextBox = (function () {
     return class UITextBox extends UIText {
         static current = null;
+        static mobileInputs = document.getElementById('mobile-inputs');
+        static canvasElement = document.getElementById('canvas');
 
         static {
             document.oncopy = (event) => {
@@ -26,6 +28,16 @@ export const UITextBox = (function () {
                 if (UITextBox.current !== null && UITextBox.current.focused) {
                     UITextBox.current.onpaste(event);
                 }
+            }
+
+            if (Constants.MOBILE_ENVIRONMENT) {
+                UITextBox.mobileInputs.addEventListener('keydown', (event) => {
+                    if (UITextBox.current !== null) {
+                        UITextBox.current.handleKeyInput(event);
+                    }
+
+                    event.preventDefault();
+                });
             }
         }
 
@@ -277,10 +289,6 @@ export const UITextBox = (function () {
             this.lastCursorFlash = Date.now();
 
             UITextBox.current = this;
-
-            if (Constants.MOBILE_ENVIRONMENT && "virtualKeyboard" in navigator) {
-                navigator.virtualKeyboard.show();
-            }
         }
 
         blur() {
@@ -292,10 +300,6 @@ export const UITextBox = (function () {
 
             this.selectionStart = 0;
             this.selectionEnd = 0;
-
-            if (Constants.MOBILE_ENVIRONMENT && "virtualKeyboard" in navigator) {
-                navigator.virtualKeyboard.show();
-            }
         }
 
         positionToIndex(position) {

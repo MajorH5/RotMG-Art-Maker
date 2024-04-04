@@ -33,7 +33,9 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="canvas-container">
-        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="1">
+            <input type="text" id="mobile-inputs" autocomplete="off" autocapitalize="off">
+        </canvas>
     </div>
     <script src="index.js" type="module"></script>
     <p style="text-align: center; color: white">To report issues or give feedback email us at <a href="mailto:feedback@realmspriter.com">
