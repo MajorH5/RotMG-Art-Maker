@@ -341,7 +341,13 @@ export const LoadScreen = (function () {
 
             this.loadingLabel.visible = false;
 
-            page.objects.forEach((object, index) => this.loadObject(object, index));
+            page.objects.forEach((object, index) => {
+                try {
+                    this.loadObject(object, index)
+                } catch (e) {
+                    console.error('Error while loading object:', e);
+                }
+            });
 
             this.isSearching = false;
         }

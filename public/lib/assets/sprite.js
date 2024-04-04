@@ -50,7 +50,7 @@ export const Sprite = (function () {
 
             if (callback) {
                 promises.forEach(promise => {
-                    promise.then(() => {
+                    promise.finally(() => {
                         totalLoaded++;
     
                         callback(totalLoaded, promises.length);
@@ -60,7 +60,7 @@ export const Sprite = (function () {
                 callback(totalLoaded, promises.length);
             }
 
-            return Promise.all(promises);
+            return Promise.allSettled(promises);
         }
 
         // caches a given image url
@@ -93,7 +93,8 @@ export const Sprite = (function () {
                     resolve(newImage);
                 };
                 newImage.onerror = () => {
-                    reject(new Error(`Failed to load image: ${source}`));
+                    console.error(new Error(`Failed to load image: ${source}`));
+                    resolve(null);
                 };
             });
         }
@@ -120,7 +121,6 @@ export const Sprite = (function () {
         // draws the sprite to the given context at the given position
         render (context, offset, scale) {
             if (this.image === null) {
-                console.warn('Render call failed, image not loaded!');
                 return;
             }
 
