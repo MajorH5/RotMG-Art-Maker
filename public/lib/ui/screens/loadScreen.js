@@ -66,7 +66,7 @@ export const LoadScreen = (function () {
                 position: new Vector2(20.5, 50.5),
 
                 choices: ['Deca', 'Mine', 'Community', 'All'],
-                defaultChoice: 'Deca'
+                defaultChoice: 'Community'
             });;
             this.sourceDropdown.parentTo(this.modal);
             
@@ -200,7 +200,7 @@ export const LoadScreen = (function () {
 
             this.currentQuery = '';
             this.currentType = 'Any Type';
-            this.currentSource = 'Deca';
+            this.currentSource = 'Community';
 
             this.searchButton.mouseUp.listen(() => this.query());
             this.searchBox.submit.listen(() => this.query());
