@@ -398,9 +398,12 @@ export const SpriteEditor = (function () {
             const screenPosition = this.getScreenPosition(screenSize);
 
             const transparentTile = Sprite.getCachedImage(Sprite.IMG_TRANSPARENT_TILE);
-            const pattern = context.createPattern(transparentTile, 'repeat');
-            context.fillStyle = pattern;
-            context.fillRect(screenPosition.x, screenPosition.y, objectSize.x, objectSize.y);
+
+            if (transparentTile !== null) {
+                const pattern = context.createPattern(transparentTile, 'repeat');
+                context.fillStyle = pattern;
+                context.fillRect(screenPosition.x, screenPosition.y, objectSize.x, objectSize.y);
+            }
             
             this.renderChildren(context, screenSize);
         }
