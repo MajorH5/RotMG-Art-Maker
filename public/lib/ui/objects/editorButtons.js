@@ -16,6 +16,7 @@ export const EditorButtons = (function () {
         static BUTTON_CLEAR = '(C)lear';
         static BUTTON_LOAD = '(L)oad';
         static BUTTON_SAVE = '(S)ave';
+        static BUTTON_EXPORT = 'E(X)port';
 
         constructor (options) {
             super({
@@ -54,7 +55,8 @@ export const EditorButtons = (function () {
             
             this.secondaryButtons = [
                 EditorButtons.BUTTON_LOAD,
-                EditorButtons.BUTTON_SAVE
+                EditorButtons.BUTTON_SAVE,
+                EditorButtons.BUTTON_EXPORT
             ];
 
             for (let i = 0; i < this.secondaryButtons.length; i++) {

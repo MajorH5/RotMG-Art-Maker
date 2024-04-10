@@ -33,6 +33,7 @@ export const UIDropdownMenu = (function () {
             this.choices = options.choices || []; // makes no sense butok
             this.currentChoice = options.defaultChoice || '';
             this.onChoice = new Event();
+            this.triggered = new Event();
 
             this.choiceContainer = new UIBase({
                 position: new Vector2(0, 1),
@@ -80,6 +81,7 @@ export const UIDropdownMenu = (function () {
 
             this.mouseDown.listen((position, mouse) => {
                 this.choiceContainer.visible = !this.choiceContainer.visible;
+                this.triggered.trigger();
 
                 if (this.choiceContainer.visible) {
                     for (let i = 0; i < this.choices.length; i++) {
@@ -113,6 +115,19 @@ export const UIDropdownMenu = (function () {
 
         isOpen () {
             return this.choiceContainer.visible;
+        }
+
+        close () {
+            this.choiceContainer.visible = false;
+        }
+
+        open () {
+            this.choiceContainer.visible = true;
+            this.triggered.trigger();
+        }
+
+        getCurrentChoice () {
+            return this.currentChoice;
         }
 
         setCurrentChoice (choice) {

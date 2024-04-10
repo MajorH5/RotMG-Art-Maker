@@ -208,6 +208,16 @@ export const ArtEditor = (function () {
                             }
                         });
                         break;
+                    case 'x':
+                        if (this.editorScreen.resetPasswordScreen.visible) return;
+                        this.editorScreen.exportScreen.clearInputs();
+                        this.editorScreen.exportScreen.visible = !this.editorScreen.exportScreen.visible;
+                        this.getModals().forEach(modal => {
+                            if (modal !== this.editorScreen.exportScreen) {
+                                modal.visible = false;
+                            }
+                        });
+                        break;
                 }
             });
         }

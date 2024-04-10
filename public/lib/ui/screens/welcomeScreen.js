@@ -15,7 +15,7 @@ export const WelcomeScreen = (function () {
                 sizeScale: Vector2.one,
                 zIndex: 9999,
 
-                // visible: false
+               // visible: false
             });
 
             this.modal = new UIBase({
