@@ -388,7 +388,7 @@ export const EditorScreen = (function () {
 
                 frames.push({ pixels, width, height });
             } else {
-                let spriteSize = this.spriteEditor.spriteSize;
+                let spriteSize = this.sequence.size;
                 const setFrames = [
                     PackagedSequence.STAND, PackagedSequence.WALK1,
                     PackagedSequence.WALK2, PackagedSequence.ATTACK1,
@@ -396,15 +396,15 @@ export const EditorScreen = (function () {
                 ];
 
                 if (format === 'PNG') {
-                    let width = 5 * spriteSize.x, height = 1 * spriteSize.y;
+                    let width = 6 * spriteSize.x, height = 1 * spriteSize.y;
                     let pixels = new Uint8Array(width * height * 4);
 
                     for (let y = 0; y < height; y++) {
                         for (let x = 0; x < width; x++) {
-                            const frame = Math.floor(x / spriteSize.x);
+                            const frame = Math.min(Math.floor(x / spriteSize.x), setFrames.length - 1);
                             const frameData = this.sequence.get(setFrames[frame]);
 
-                            const frameX = x % spriteSize.x;
+                            const frameX = x % spriteSize.x + (x >= (spriteSize.x * 5) ? spriteSize.x : 0);
                             const frameY = y % spriteSize.y;
 
                             const pixelHex = frameData.get(new Vector2(frameX, frameY));
@@ -431,14 +431,17 @@ export const EditorScreen = (function () {
                     frames.push({ pixels: pixels, width: width, height: height });
                 } else if (format === 'GIF') {
                     for (let i = 0; i < setFrames.length; i++) {
+                        let width = spriteSize.x * (i === setFrames.length - 1 ? 2 : 1),
+                            height = spriteSize.y;
+
                         const frame = setFrames[i];
                         const frameData = this.sequence.get(frame);
-                        let framePixels = new Uint8Array(spriteSize.x * spriteSize.y * 4);
+                        let framePixels = new Uint8Array(width * height * 4);
         
-                        for (let y = 0; y < spriteSize.y; y++) {
-                            for (let x = 0; x < spriteSize.x; x++) {
+                        for (let y = 0; y < height; y++) {
+                            for (let x = 0; x < width; x++) {
                                 const pixelHex = frameData.get(new Vector2(x, y));
-                                const index = (x + y * spriteSize.x) * 4;
+                                const index = (x + y * width) * 4;
                                 let r = 0, g = 0, b = 0, a = 0;
         
                                 if (pixelHex !== null && pixelHex !== undefined) {
@@ -453,10 +456,8 @@ export const EditorScreen = (function () {
                             }
                         }
 
-                        let width = spriteSize.x, height = spriteSize.y;
-
                         if (rotmgify) {
-                            framePixels = RotMGSprite.RotMGify(framePixels, spriteSize.x, spriteSize.y);
+                            framePixels = RotMGSprite.RotMGify(framePixels, width, height);
                             width = (width + 2) * 5, height = (height + 2) * 5;
                         }
         
@@ -502,7 +503,7 @@ export const EditorScreen = (function () {
                 workerScript: '/lib/libraries/gif.worker.js'
             });
 
-            for (let i = 0; i < frames.length; i++) {
+            for (let i = frames.length - 1; i >= 0; i--) {
                 const {pixels, width, height} = frames[i];
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
@@ -511,6 +512,8 @@ export const EditorScreen = (function () {
 
                 canvas.width = width;
                 canvas.height = height;
+
+                console.log(width, height)
 
                 const imageData = context.createImageData(width, height);
 
