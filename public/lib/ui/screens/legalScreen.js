@@ -4,6 +4,7 @@ import { Vector2 } from "../../utils/vector2.js";
 import { Sounds } from '../../assets/sounds.js';
 import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
+import { Constants } from "../../utils/constants.js";
 
 export const LegalScreen = (function () {
     const disclaimerText = `This website (www.realmspriter.com) and the tools provided herein are intended for entertainment and educational purposes only. This tool is a clone of a currently defunct tool originally created by Wildshadow Studios and is NOT associated with Realm of the Mad God (RotMG) or DECA LIVE OPERATIONS GMBH in any way.
@@ -139,9 +140,13 @@ By selecting "I Understand", you acknowledge that you have read and understood t
             this.understand.parentTo(this.modal);
 
             this.understand.mouseUp.listen(() => {
+                if (localStorage.getItem('lastUpdate') !== Constants.VERSION) {
+                    ArtEditor.updateScreen.visible = true;
+                } else {
+                    Sounds.playTheme(Sounds.SND_THEME);
+                    ArtEditor.performKeybinds();
+                }
                 this.visible = false;
-                Sounds.playTheme(Sounds.SND_THEME);
-                ArtEditor.performKeybinds();
             });
         }
     }

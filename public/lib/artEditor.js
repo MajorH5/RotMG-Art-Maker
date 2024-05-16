@@ -18,6 +18,7 @@ import { UIBase } from "./ui/uiBase.js";
 import { Auth } from "./api/auth.js";
 import { LegalScreen } from "./ui/screens/legalScreen.js";
 import { PreloadScreen } from "./ui/screens/preloadScreen.js";
+import { UpdateScreen } from "./ui/screens/updateScreen.js";
 
 export const ArtEditor = (function () {
     return class ArtEditor {
@@ -40,6 +41,9 @@ export const ArtEditor = (function () {
 
             this.preloadScreen = new PreloadScreen();
             this.uiRoot.addObject(this.preloadScreen);
+
+            this.updateScreen = new UpdateScreen();
+            this.uiRoot.addObject(this.updateScreen);
 
             // this.editorScreen.visible = false;
             // this.welcomeScreen.visible = false;
@@ -145,7 +149,7 @@ export const ArtEditor = (function () {
 
                 if (user.error === undefined) {
                     this.user = user;
-                    Auth.setCookie('jwt', Auth.encodeUser(user), 1);
+                    Auth.setCookie('jwt', Auth.encodeUser(user));
                     this.editorScreen.onUserLogin(user);
 
                     this.editorScreen.currentAccountScreen.visible = false;
@@ -296,7 +300,7 @@ export const ArtEditor = (function () {
             return Auth.signIn(email, password).then((result) => {
                 if (result.error === undefined) {
                     this.user = result;
-                    Auth.setCookie('jwt', Auth.encodeUser(result), 1);
+                    Auth.setCookie('jwt', Auth.encodeUser(result));
                     this.editorScreen.onUserLogin(result);
                 }
 
@@ -348,7 +352,7 @@ export const ArtEditor = (function () {
         }
 
         getModals () {
-            return [this.welcomeScreen, this.legalScreen, ...this.editorScreen.getModals()];
+            return [this.welcomeScreen, this.legalScreen, this.updateScreen, ...this.editorScreen.getModals()];
         }
     }
 })()

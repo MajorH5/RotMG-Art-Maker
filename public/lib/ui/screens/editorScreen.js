@@ -24,6 +24,7 @@ import { ForgotPasswordScreen } from './forgotPasswordScreen.js';
 import { DeleteScreen } from './deleteScreen.js';
 import { ResetPasswordScreen } from './resetPassswordScreen.js';
 import { ExportScreen } from './exportScreen.js';
+import { Constants } from '../../utils/constants.js';
 
 export const EditorScreen = (function () {
     return class EditorScreen extends UIBase {
@@ -312,19 +313,27 @@ export const EditorScreen = (function () {
                 this.currentAccountScreen.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.details.verified;
             });
 
-            this.versionText = new UIText('v1.0.0', {
+            this.versionText = new UIText(Constants.VERSION, {
                 font: 'myriadpro_light',
                 fontSize: 13,
                 fontColor: '#aaaaaa',
                 textXAlignment: 'right',
                 pivot: new Vector2(1, 1),
                 position: new Vector2(-10, 3),
-                size: new Vector2(60, 30),
+                size: new Vector2(60, 15),
                 positionScale: new Vector2(1, 1),
                 shadowBlur: 5,
                 textTransparency: 0.5,
+                clickable: true,
                 shadow: true,
                 zIndex: -1
+            });
+            this.versionText.mouseUp.listen(() => {
+                if (ArtEditor.isModalOpen()) {
+                    return;
+                }
+
+                ArtEditor.updateScreen.visible = true;
             });
             this.versionText.parentTo(this);
 

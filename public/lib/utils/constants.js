@@ -14,5 +14,6 @@ export const Constants = (function () {
         RESOURCES_URL: 'https://static.drips.pw',
         ORIGIN: DEV_ENVIRONMENT ? window.location.origin : "https://realmspriter.com",
         DEFAULT_CANVAS_SIZE: new Vector2(880, 700),
+        VERSION: 'v1.0.1'
     }
 })();

@@ -108,7 +108,6 @@ export const WelcomeScreen = (function () {
             this.enter.mouseUp.listen(() => {
                 this.visible = false;
                 ArtEditor.legalScreen.visible = true;
-                // Sounds.playTheme(Sounds.SND_THEME);
             });
         }
     }
