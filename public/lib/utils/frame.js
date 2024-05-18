@@ -62,7 +62,7 @@ export const Frame = (function () {
         }
 
         get (position) {
-            return this.pixels[position.y][position.x];
+            return this.pixels[position.y][position.x] || null;
         }
 
         clear () {
@@ -121,7 +121,7 @@ export const Frame = (function () {
                     const index = (y * this.size.x + x) * 4;
                     const color = this.pixels[y][x];
 
-                    let r = 0, g = 0, b = 0, a = 0 ;
+                    let r = 0, g = 0, b = 0, a = 0;
 
                     if (color !== null) {
                         r = parseInt(color.substring(1, 3), 16);
