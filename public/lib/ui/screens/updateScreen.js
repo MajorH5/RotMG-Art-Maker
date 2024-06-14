@@ -7,8 +7,7 @@ import { UIBase } from "../uiBase.js";
 import { Constants } from "../../utils/constants.js";
 
 export const UpdateScreen = (function () {
-    const versionText = `• Increased user post limit to 100 per user
-• Fixed getting logged out randomly`;
+    const versionText = `• Increased user post limit to 200 per user`;
 
     return class UpdateScreen extends UIBase {
         constructor () {
