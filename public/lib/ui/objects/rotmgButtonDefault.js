@@ -42,6 +42,7 @@ export const RotmgButtonDefault = (function () {
 
         setActive (active) {
             this.active = active;
+            this.clickable = active;
             this.backgroundColor = active ? (this.hovered ? '#ffda84' : '#ffffff'): '#4f4f4f';
         }
     }

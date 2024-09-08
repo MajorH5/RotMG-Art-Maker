@@ -1,6 +1,8 @@
+import { PatchNotesData } from "./patchNotesData.js";
 import { Vector2 } from "./vector2.js";
 
 export const Constants = (function () {
+    const PATCH_NOTES = PatchNotesData;
     const DEV_ENVIRONMENT = !location.origin.includes('realmspriter');
     const IS_MOBILE = (function() {
         let check = false;
@@ -14,6 +16,10 @@ export const Constants = (function () {
         RESOURCES_URL: 'https://static.drips.pw',
         ORIGIN: DEV_ENVIRONMENT ? window.location.origin : "https://realmspriter.com",
         DEFAULT_CANVAS_SIZE: new Vector2(880, 700),
-        VERSION: 'v1.0.2'
+        SCROLL_RATE: 48,
+        MAX_COMMENT_LENGTH: 2048,
+        SCROLL_INTERPOLATION_SPEED: 0.53,
+        VERSION: 'v1.1.0',
+        PATCH_NOTES: PATCH_NOTES,
     }
 })();

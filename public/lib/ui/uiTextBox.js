@@ -57,6 +57,7 @@ export const UITextBox = (function () {
             this.selectionStart = 0;
             this.selectionEnd = 0;
             this.selectionAnchor = 0;
+            this.textEditable = typeof options.textEditable === "boolean" ? options.textEditable : true;
 
             this.clipChildren = typeof options.clipChildren !== 'undefined' ? options.clipChildren : true;
 
@@ -67,6 +68,8 @@ export const UITextBox = (function () {
 
             this.submit = new Event();
             this.onInput = new Event();
+            this.onFocus = new Event();
+            this.onBlur = new Event();
 
             let isHeld = false;
 
@@ -112,7 +115,7 @@ export const UITextBox = (function () {
         }
 
         handleKeyInput(event) {
-            if (!this.focused) return;
+            if (!this.focused || !this.textEditable) return;
 
             this.cursorVisible = true;
             this.lastCursorFlash = Date.now();
@@ -253,6 +256,8 @@ export const UITextBox = (function () {
         }
 
         oncut (event) {
+            if (!this.textEditable) return;
+            
             event.preventDefault();
             event.clipboardData.setData('text/plain', this.text.substring(this.selectionStart, this.selectionEnd));
             this.text = this.text.substring(0, this.selectionStart) + this.text.substring(this.selectionEnd);
@@ -262,6 +267,8 @@ export const UITextBox = (function () {
         }
 
         onpaste (event) {
+            if (!this.textEditable) return;
+
             event.preventDefault();
             let text = event.clipboardData.getData('text/plain');
             const maxAllowed = Math.min(this.maxInputLength - this.text.length, text.length);
@@ -280,6 +287,10 @@ export const UITextBox = (function () {
         }
 
         focus() {
+            if (!this.textEditable) {
+                return;
+            }
+
             if (UITextBox.current !== null) {
                 UITextBox.current.blur();
             }
@@ -289,6 +300,7 @@ export const UITextBox = (function () {
             this.lastCursorFlash = Date.now();
 
             UITextBox.current = this;
+            this.onFocus.trigger();
         }
 
         blur() {
@@ -300,6 +312,7 @@ export const UITextBox = (function () {
 
             this.selectionStart = 0;
             this.selectionEnd = 0;
+            this.onBlur.trigger();
         }
 
         positionToIndex(position) {
@@ -349,6 +362,10 @@ export const UITextBox = (function () {
             if (this.lastCursorFlash + 500 < Date.now()) {
                 this.cursorVisible = !this.cursorVisible;
                 this.lastCursorFlash = Date.now();
+            }
+
+            if (!this.textEditable && this.focused) {
+                this.blur();
             }
         }
 

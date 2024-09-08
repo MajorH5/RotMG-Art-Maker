@@ -36,6 +36,7 @@ export const UIText = (function () {
             this.font = options.font || UIText.DEFAULT_FONT;
             this.fontSize = options.fontSize || 16;
             this.fontColor = options.fontColor || "black";
+            this.underline = options.underline || false;
             this.lineHeight = options.lineHeight || 5;
             this.textTransparency = typeof options.textTransparency === 'number' ? options.textTransparency : 1;
 
@@ -65,6 +66,35 @@ export const UIText = (function () {
 
         getRenderedText () {
             return this.displayText || this.text;
+        }
+
+        getTextWidth () {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.font = `${this.fontSize}px ${this.font}`;
+            return context.measureText(this.getRenderedText()).width;
+        }
+
+        getTextHeight () {
+            // takes into consideration the line height
+            // and wrapping of the text
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            context.font = `${this.fontSize}px ${this.font}`;
+
+            const lines = this.textWraps ? this.getLines(context, this.getRenderedText(), this.getScreenSize().x) : this.getRenderedText().split('\n');
+            return (this.fontSize + this.lineHeight) * lines.length;
+        }
+
+        hasAbsoluteVisibility () {
+            if (!super.hasAbsoluteVisibility() ) {
+                if (this.textTransparency === 0) {
+                    return false;
+                }
+            }
+
+            return super.isVisibleOnScreen();
         }
 
         getLines(context, text, maxWidth) {
@@ -206,15 +236,34 @@ export const UIText = (function () {
                     } else if (this.textXAlignment === "left") {
                         position.x += this.paddingLeft;
                     }
+
+                    if (this.underline) {
+                        const underlineY = position.y + this.fontSize / 2.5;
+                        context.strokeStyle = color;
+                        context.beginPath();
+                        context.moveTo(position.x, underlineY);
+                        context.lineTo(position.x + textWidth, underlineY);
+                        context.stroke();
+                    }
     
                     context.fillText(lines[i], position.x, position.y);
                 }
             } else {
                 // TODO: respect alignment & padding when not wrapping
                 const position = new Vector2(rootPosition.x, rootPosition.y + this.fontSize);
+                const textWidth = context.measureText(text).width;
 
                 position.x += this.paddingLeft;
                 position.y += this.paddingTop
+
+                if (this.underline) {
+                    const underlineY = position.y + this.fontSize / 2.5;
+                    context.strokeStyle = color;
+                    context.beginPath();
+                    context.moveTo(position.x, underlineY);
+                    context.lineTo(position.x + textWidth, underlineY);
+                    context.stroke();
+                }
 
                 context.fillText(text, position.x, position.y);
             }

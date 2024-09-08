@@ -4,9 +4,10 @@ import { UIBase } from "../uiBase.js";
 import { UIText } from "../uiText.js";
 import { Sounds } from "../../assets/sounds.js";
 import { Auth } from "../../api/auth.js";
+import { Modal } from "../objects/modal.js";
 
 export const SignUpScreen = (function () {
-    return class SignUpScreen extends UIBase {
+    return class SignUpScreen extends Modal {
         constructor (options) {
             super({
                 backgroundColor: '#000000',

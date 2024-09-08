@@ -10,6 +10,7 @@ export const Post = (function () {
             this.size = new Vector2(this.image.size.x, this.image.size.y);
             this.postName = post.name;
             this.tags = post.tags;
+            this.username = post.username;
             this.type = post.type;
             this.ownerId = post.user_id;
             this.objectId = post.name;

@@ -25,6 +25,7 @@ export const RotmgButtonBorder = (function () {
                 ...options
             });
 
+            this.isDisabled = false;
             this.isActive = false;
             this.isHeld = false;
 
@@ -37,20 +38,24 @@ export const RotmgButtonBorder = (function () {
             this.hover.parentTo(this);
 
 
-
             this.mouseEnter.listen(() => {
+                if (this.isDisabled) return;
+                
                 this.hover.backgroundEnabled = true;
             });
             
             this.mouseDown.listen(() => {
+                if (this.isDisabled) return;
                 this.hover.backgroundEnabled = false;
             });
             
             this.mouseUp.listen(() => {
+                if (this.isDisabled) return;
                 this.hover.backgroundEnabled = true;
             })
             
             this.mouseLeave.listen(() => {
+                if (this.isDisabled) return;
                 this.hover.backgroundEnabled = this.isActive;
             });
             
@@ -59,6 +64,12 @@ export const RotmgButtonBorder = (function () {
         setActive (isActive) {
             this.isActive = isActive;
             this.hover.backgroundEnabled = isActive;
+        }
+
+        setDisabled (isDisabled) {
+            this.isDisabled = isDisabled;
+            this.hover.backgroundEnabled = false;
+            this.clickable = !isDisabled;
         }
     }
 })();

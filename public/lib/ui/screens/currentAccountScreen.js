@@ -4,9 +4,10 @@ import { UIBase } from "../uiBase.js";
 import { UIText } from "../uiText.js";
 import { Sounds } from "../../assets/sounds.js";
 import { Auth } from "../../api/auth.js";
+import { Modal } from "../objects/modal.js";
 
 export const CurrentAccountScreen = (function () {
-    return class CurrentAccountScreen extends UIBase {
+    return class CurrentAccountScreen extends Modal {
         constructor (options) {
             super({
                 backgroundColor: '#000000',

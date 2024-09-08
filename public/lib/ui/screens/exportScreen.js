@@ -9,9 +9,10 @@ import { Posts } from "../../api/posts.js";
 import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
 import { Event } from "../../utils/event.js";
+import { Modal } from "../objects/modal.js";
 
 export const ExportScreen = (function () {
-    return class ExportScreen extends UIBase {
+    return class ExportScreen extends Modal {
         constructor (options) {
             super({
                 backgroundColor: '#000000',

@@ -5,9 +5,10 @@ import { Sounds } from '../../assets/sounds.js';
 import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
 import { Constants } from "../../utils/constants.js";
+import { Modal } from "../objects/modal.js";
 
 export const WelcomeScreen = (function () {
-    return class WelcomeScreen extends UIBase {
+    return class WelcomeScreen extends Modal {
         constructor () {
             super({
                 backgroundColor: '#222222',

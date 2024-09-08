@@ -15,9 +15,11 @@ import { Event } from "../../utils/event.js";
 import { Query } from "../../utils/query.js";
 import { Posts } from "../../api/posts.js";
 import { Post } from "../../utils/post.js";
+import { AboutPostScreen } from "./aboutPostScreen.js";
+import { Modal } from "../objects/modal.js";
 
 export const LoadScreen = (function () {
-    return class LoadScreen extends UIBase {
+    return class LoadScreen extends Modal {
         constructor (options) {
             super({
                 sizeScale: Vector2.one,
@@ -191,6 +193,70 @@ export const LoadScreen = (function () {
             this.cellsX = 5;
             this.cellsY = 3;
             
+            this.aboutModal = this.modal.clone(false);
+            this.aboutModal.sizeAbsolute = new Vector2(680, 660);
+            this.aboutModal.visible = false
+            this.viewingObject = null;
+            this.aboutModal.parentTo(this);
+
+            this.aboutScreen = new AboutPostScreen({});
+            this.aboutScreen.backButton.mouseUp.listen(() => {
+                this.aboutModal.visible = false;
+                this.modal.visible = true;
+                this.viewingObject = null;
+            });
+            this.aboutScreen.loadButton.mouseUp.listen(() => {
+                const object = this.viewingObject;
+
+                if (object === null) return;
+
+                const [, rectSize] = object.getTextureRect();
+                const frames = object.getTextureFrames();
+                let objectData = null;
+
+                if (object.isAnimatedTexture) {
+                    objectData = PackagedSequence.fromFrames(frames, rectSize);
+                } else {
+                    objectData = frames[0].pixels;
+                }
+
+                if (object instanceof Post) {
+                    this.onSelect.trigger(object.isAnimatedTexture, rectSize, objectData, object);
+                } else {
+                    this.onSelect.trigger(object.isAnimatedTexture, rectSize, objectData);
+                }
+                this.visible = false;
+            });
+            this.aboutScreen.deleteButton.mouseUp.listen(() => {
+                if (!this.aboutScreen.deleteButton.active) return;
+
+                const object = this.viewingObject;
+                const deleteScreen = ArtEditor.editorScreen.deleteScreen;
+                deleteScreen.postName.text = `"${object.postName}"`;
+                deleteScreen.visible = true;
+                this.aboutModal.visible = false;
+
+                deleteScreen.bindDelete(async (shouldDelete) => {
+                    if (ArtEditor.user === null) return;
+
+                    if (shouldDelete) {
+                        return Posts.deletePost(object.postId, ArtEditor.user.token)
+                            .then(() => this.loadPage(this.currentIndex))
+                            .catch((error) => {
+                                console.log(error);
+                            })
+                            .finally(() => {
+                                this.aboutModal.visible = !shouldDelete;
+                                this.modal.visible = shouldDelete;
+                            });
+                    }
+
+                    this.aboutModal.visible = !shouldDelete;
+                    this.modal.visible = shouldDelete;
+                });
+            });
+            this.aboutScreen.parentTo(this.aboutModal);
+
             this.spriteLoader = new RotMGSpriteLoader(this.cellsX * this.cellsY);
             this.currentSearchPage = null;
             this.currentIndex = 0
@@ -229,18 +295,24 @@ export const LoadScreen = (function () {
             cell.positionAbsolute = cellPosition;
             cell.parentTo(this.cells);
 
-            cell.deleteButton.mouseUp.listen(() => {
-                const deleteScreen = ArtEditor.editorScreen.deleteScreen;
-                deleteScreen.postName.text = `"${object.postName}"`;
-                deleteScreen.visible = true;
+            // cell.deleteButton.mouseUp.listen(() => {
+            //     const deleteScreen = ArtEditor.editorScreen.deleteScreen;
+            //     deleteScreen.postName.text = `"${object.postName}"`;
+            //     deleteScreen.visible = true;
 
-                deleteScreen.bindDelete(async () => {
-                    if (ArtEditor.user === null) return;
+            //     deleteScreen.bindDelete(async () => {
+            //         if (ArtEditor.user === null) return;
 
-                    await Posts.deletePost(object.postId, ArtEditor.user.token);
-                    await this.loadPage(this.currentIndex);
-                });
-            });
+            //         await Posts.deletePost(object.postId, ArtEditor.user.token);
+            //         await this.loadPage(this.currentIndex);
+            //     });
+            // });
+
+            // cell.aboutButton.mouseUp.listen(() => {
+            //     this.aboutScreen.load(object);
+            //     this.aboutModal.visible = true;
+            //     this.modal.visible = false
+            // });
 
             cell.mouseUp.listen(() => {
                 if (cell.absorb) return;
@@ -248,22 +320,10 @@ export const LoadScreen = (function () {
                 if (this.typeDropdown.isOpen()) return;
                 if (ArtEditor.editorScreen.deleteScreen.visible) return;
                 
-                const [, rectSize] = object.getTextureRect();
-                const frames = object.getTextureFrames();
-                let objectData = null;
-
-                if (object.isAnimatedTexture) {
-                    objectData = PackagedSequence.fromFrames(frames, rectSize);
-                } else {
-                    objectData = frames[0].pixels;
-                }
-
-                if (object instanceof Post) {
-                    this.onSelect.trigger(object.isAnimatedTexture, rectSize, objectData, object);
-                } else {
-                    this.onSelect.trigger(object.isAnimatedTexture, rectSize, objectData);
-                }
-                this.visible = false;
+                this.aboutScreen.load(object);
+                this.aboutModal.visible = true;
+                this.modal.visible = false;
+                this.viewingObject = object;
             });
         }
 

@@ -14,6 +14,7 @@ export const Mouse = (function () {
             this.down = false;
             this.up = false;
             this.identifier = null;
+            this.hit = null;
             this.scroll = 0;
 
             this.heldObjects = new Map();

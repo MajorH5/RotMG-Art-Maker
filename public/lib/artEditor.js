@@ -18,7 +18,6 @@ import { UIBase } from "./ui/uiBase.js";
 import { Auth } from "./api/auth.js";
 import { LegalScreen } from "./ui/screens/legalScreen.js";
 import { PreloadScreen } from "./ui/screens/preloadScreen.js";
-import { UpdateScreen } from "./ui/screens/updateScreen.js";
 
 export const ArtEditor = (function () {
     return class ArtEditor {
@@ -41,9 +40,6 @@ export const ArtEditor = (function () {
 
             this.preloadScreen = new PreloadScreen();
             this.uiRoot.addObject(this.preloadScreen);
-
-            this.updateScreen = new UpdateScreen();
-            this.uiRoot.addObject(this.updateScreen);
 
             // this.editorScreen.visible = false;
             // this.welcomeScreen.visible = false;
@@ -123,7 +119,10 @@ export const ArtEditor = (function () {
             } catch (error) {
                 console.error('Error decoding user from jwt:', error);
                 this.user = null;
-                this.editorScreen.onUserLogout();
+            } finally {
+                if (this.user === null) {
+                    this.editorScreen.onUserLogout();
+                }
             }
 
             try {
@@ -352,7 +351,7 @@ export const ArtEditor = (function () {
         }
 
         getModals () {
-            return [this.welcomeScreen, this.legalScreen, this.updateScreen, ...this.editorScreen.getModals()];
+            return [this.welcomeScreen, this.legalScreen, ...this.editorScreen.getModals()];
         }
     }
 })()

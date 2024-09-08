@@ -26,43 +26,15 @@ export const SpriteCell = (function () {
             } else {
                 this.isOwner = false;
             }
-
-            this.deleteButton = new RotmgButtonBorder('X', {
-                size: new Vector2(18, 18),
-                positionScale: new Vector2(1, 0),
-                pivot: new Vector2(1, 0),
-                position: new Vector2(-10, 10),
-                fontSize: 13,
-                paddingLeft: 0,
-                textXAlignment: 'center',
-                borderSize: 1,
-                shadow: true,
-                shadowBlur: 3,
-                borderColor: '#888888',
-                borderRadius: 5,
-                clipChildren: true,
-                visible: false,
-                zIndex: 10
-            });
-
+            
             this.absorb = false;
-            this.deleteButton.parentTo(this);
-
-            this.deleteButton.mouseDown.listen((pos, mouse) => {
-                this.absorb = true;
-                mouse.mouseUp.listenOnce(() => {
-                    setTimeout(() => this.absorb = false);
-                });
-            });
 
             this.mouseEnter.listen(() => {
                 this.backgroundEnabled = true;
-                this.deleteButton.visible = this.isOwner;
             });
             
             this.mouseLeave.listen(() => {
                 this.backgroundEnabled = false;
-                this.deleteButton.visible = false;
             });
 
             // console.log(object)

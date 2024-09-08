@@ -1,13 +1,14 @@
 import { Vector2 } from "../utils/vector2.js";
 import { Event } from "../utils/event.js"
+import { Constants } from "../utils/constants.js";
 
 export const UIBase = (function () {
     return class UIBase {
         constructor (options) {
-            this.positionAbsolute = options.position || new Vector2(0, 0);
+            this.positionAbsolute = options.position || options.positionAbsolute || new Vector2(0, 0);
             this.positionScale = options.positionScale || new Vector2(0, 0);
 
-            this.sizeAbsolute = options.size || new Vector2(0, 0);
+            this.sizeAbsolute = options.size || options.sizeAbsolute || new Vector2(0, 0);
             this.sizeScale = options.sizeScale || new Vector2(0, 0);
 
             this.scale = options.scale || new Vector2(1, 1);
@@ -32,7 +33,16 @@ export const UIBase = (function () {
 
             this.scrollableX = options.scrollableX || false;
             this.scrollableY = options.scrollableY || false;
+            this.isModal = options.isModal || false;
+            this.absorbsAllInput = options.absorbsAllInput || false;
+
+            this.scrollHeld = false;
+
             this.canvasPosition = options.canvasPosition || Vector2.zero;
+            this.canvasSize = options.canvasSize || Vector2.zero;
+            this.goalCanvasPosition = Vector2.zero;
+
+            this.interpolateCanvasPosition = typeof options.interpolateCanvasPosition === 'boolean' ? options.interpolateCanvasPosition : true;
 
             this.borderRadius = options.borderRadius || 0;
 
@@ -55,22 +65,96 @@ export const UIBase = (function () {
             this.mouseMove = new Event();
             this.scrolled = new Event();
 
+            this.parentChanged = new Event();
+
             this.preChildRender = new Event();
             this.postChildRender = new Event();
             this.onUpdate = new Event();
             this.onRender = new Event();
+
+            this.scrolled.listen((delta) => {
+                const screenSize = this.getScreenSize().y;
+                if (!this.scrollableY || !this.isVisibleOnScreen(this.lastScreenSize, true) || this.canvasSize.y < screenSize.y) {
+                    return;
+                }
+
+                this.goalCanvasPosition.y += delta * Constants.SCROLL_RATE;
+                
+                if (this.goalCanvasPosition.y > 0) {
+                    this.goalCanvasPosition.y = 0;
+                } else if (this.canvasSize.magnitude() > 0 && this.goalCanvasPosition.y < -this.canvasSize.y) {
+                    this.goalCanvasPosition.y = -this.canvasSize.y;
+                }
+            });
+
+            this.mouseDown.listen((position, mouse) => {
+                // listen for scroll wheel grab
+                if (!this.scrollableY || !this.isVisibleOnScreen(this.lastScreenSize, true)) {
+                    return;
+                }
+
+                const size = this.getScreenSize();
+                const positionOnScreen = this.getScreenPosition();
+
+                const visibleRatio = size.y / (this.canvasSize.y + size.y);  // Ratio of visible to total content
+                const scrollHeight = Math.max(size.y * visibleRatio, 10);  // Ensures a minimum size for usability
+                const scrollIndicatorSize = new Vector2(10, scrollHeight);
+                const scrollIndicatorPositionX = positionOnScreen.x + size.x - 10;
+                const scrollBarPosition = new Vector2(size.x - 10, 0);
+
+                let scrollRatio = -this.canvasPosition.y / this.canvasSize.y;
+                let scrollIndicatorPositionY = positionOnScreen.y + scrollBarPosition.y + scrollRatio * (size.y - scrollIndicatorSize.y);
+
+
+                if (position.x >= scrollIndicatorPositionX && position.x <= scrollIndicatorPositionX + scrollIndicatorSize.x &&
+                    position.y >= scrollIndicatorPositionY && position.y <= scrollIndicatorPositionY + scrollIndicatorSize.y &&
+                    !this.scrollHeld) {
+                    this.scrollHeld = true;
+                    
+                    const moveHandler = (position) => {
+                        let yPosition = position.y;
+
+                        if (yPosition < positionOnScreen.y) {
+                            yPosition = positionOnScreen.y;
+                        } else if (yPosition > positionOnScreen.y + size.y) {
+                            yPosition = positionOnScreen.y + size.y
+                        }
+
+                        const ratio = (yPosition - positionOnScreen.y) / size.y;
+                        const goalCanvasY = -this.canvasSize.y * ratio;
+
+
+                        if (goalCanvasY > 0) {
+                            this.goalCanvasPosition.y = 0;
+                        } else if (goalCanvasY < -this.canvasSize.y) {
+                            this.goalCanvasPosition.y = -this.canvasSize.y;
+                        } else {
+                            this.goalCanvasPosition.y = goalCanvasY;
+                            this.canvasPosition.y = goalCanvasY;
+                        }
+                    };
+
+                    mouse.mouseMoved.listen(moveHandler);
+                    mouse.mouseUp.listenOnce(() => {
+                        this.scrollHeld = false;
+                        mouse.mouseMoved.unlisten(moveHandler);
+                    });
+                }
+            });
         }
 
         // clones this object
-        clone () {
+        clone (recurse = true) {
             // TODO: This is not a smart approach as derived classes
             // will be converted to UIBase objects. we could use this.constructor
             // but parameters vary between child classes
             const obj = new UIBase(this);
 
-            for (const child of this.children) {
-                const childObj = child.clone();
-                childObj.parentTo(obj);
+            if (recurse) {
+                for (const child of this.children) {
+                    const childObj = child.clone();
+                    childObj.parentTo(obj);
+                }
             }
 
             return obj;
@@ -89,13 +173,21 @@ export const UIBase = (function () {
                 }
             }
 
+            // interpolate the canvas position
+            if (this.interpolateCanvasPosition) {
+                const diff = this.goalCanvasPosition.subtract(this.canvasPosition);
+                const speed = diff.scale(Constants.SCROLL_INTERPOLATION_SPEED);
+
+                this.canvasPosition = this.canvasPosition.add(speed);
+            }
+
             this.onUpdate.trigger(deltaTime);
         }
 
         // renders the object to the given context
         // along with all of its children
         render (context, screenSize, offset) {
-            if (!this.visible) return;
+            if (!this.isVisibleOnScreen(screenSize, true)) return;
 
             let position = this.getScreenPosition(screenSize);
             const size = this.getScreenSize(screenSize);
@@ -160,11 +252,17 @@ export const UIBase = (function () {
             // draw the children
             const children = this.children.sort((a, b) => a.zIndex - b.zIndex);
 
+            // translate by canvas position
+            context.translate(this.canvasPosition.x, this.canvasPosition.y);
+
             for (let i = 0; i < children.length; i++){
                 if (children[i].visible){
-                    children[i].render(context, screenSize, this.canvasPosition);
+                    children[i].render(context, screenSize, Vector2.zero);
                 }
             }
+
+            // translate back
+            context.translate(-this.canvasPosition.x, -this.canvasPosition.y);
         }
 
         // renders the object to the given context
@@ -198,12 +296,77 @@ export const UIBase = (function () {
             
             context.closePath();                
 
+            // if (this.scrollableY && this.canvasSize.y*2 > size.y) {
+            if (this.scrollableY) {
+                this.renderScrollBar(context, screenSize);
+            }
         }
 
-        // returns true if the given point is inside the object
-        isPointInside (point, screenSize) {
-            const position = this.getScreenPosition(screenSize);
+        renderScrollBar (context, screenSize) {
             const size = this.getScreenSize(screenSize);
+            const position = this.getScreenPosition(screenSize, true);
+
+            const scrollBarSize = new Vector2(10, size.y);
+            const visibleRatio = size.y / (this.canvasSize.y + size.y);  // Ratio of visible to total content
+
+            const scrollHeight = Math.max(size.y * visibleRatio, 10);  // Ensures a minimum size for usability
+            const scrollIndicatorSize = new Vector2(10, scrollHeight);
+
+            const scrollBarPosition = new Vector2(size.x - 10, 0);
+
+            let scrollRatio = -this.canvasPosition.y / this.canvasSize.y;
+            let scrollIndicatorPositionY = scrollBarPosition.y + scrollRatio * (size.y - scrollIndicatorSize.y);
+
+            const scrollIndicatorPosition = scrollBarPosition.add(new Vector2(0, scrollIndicatorPositionY));
+
+            context.beginPath();
+            context.rect(scrollBarPosition.x, scrollBarPosition.y, scrollBarSize.x, scrollBarSize.y);
+            context.fillStyle = "#444444";
+            context.fill();
+            context.closePath();
+
+            context.beginPath();
+            context.rect(scrollIndicatorPosition.x, scrollIndicatorPosition.y, scrollIndicatorSize.x, scrollIndicatorSize.y);
+            context.fillStyle = "#666666";
+            context.fill();
+            context.closePath();
+        }
+
+        // returns total offset from all ancestors canvas positions
+        getCanvasOffset () {
+            let offset = Vector2.zero;
+
+            let parent = this.parent;
+
+            while (parent !== null) {
+                offset = offset.add(parent.canvasPosition);
+                parent = parent.parent;
+            }
+
+            return offset;
+        }
+
+
+        // returns true if the given point is inside the object
+        isPointInside (point, screenSize, useCanvasOffset = false) {
+            const position = this.getScreenPosition(screenSize, useCanvasOffset);
+            const size = this.getScreenSize(screenSize);
+            
+            
+            // TODO : slightly clipped objects are still
+            // kind of clickable, below fix does not work
+            // if (this.parent != null && this.parent.clipChildren) {
+            //     const parentPosition = this.parent ? this.parent.getScreenPosition(screenSize, useCanvasOffset) : new Vector2(0, 0);
+            //     const parentSize = this.parent ? this.parent.getScreenSize(screenSize) : screenSize;
+
+            //     // clamp position and size to parent in case
+            //     // the object is clipped
+            //     position.x = Math.max(position.x, parentPosition.x);
+            //     position.y = Math.max(position.y, parentPosition.y);
+
+            //     size.x = Math.min(size.x, parentSize.x - position.x);
+            //     size.y = Math.min(size.y, parentSize.y - position.y);
+            // }
 
             return point.x >= position.x && point.x <= position.x + size.x &&
                 point.y >= position.y && point.y <= position.y + size.y;
@@ -211,14 +374,31 @@ export const UIBase = (function () {
 
         // parents this object to the given object
         parentTo (object) {
+            let oldParent = this.parent;
+            
             if (object === null) {
                 this.unparent();
             }
 
-            if (!(object instanceof UIBase) || object === this) return;
+            if (object === this) {
+                throw new Error("UIBase: Cannot parent an object to itself");
+            } else if (!(object instanceof UIBase)) {
+                throw new Error("UIBase: Cannot parent an object to a non-UIBase object");
+            };
+
+            let ancestor = object.parent;
+
+            while (ancestor !== null) {
+                if (ancestor === this) {
+                    throw new Error("UIBase: Cannot parent an object to a child object");
+                }
+
+                ancestor = ancestor.parent;
+            }
 
             this.parent = object;
             object.children.push(this);
+            this.parentChanged.trigger(object, oldParent);
         }
 
         // removes the parent for this object
@@ -236,6 +416,7 @@ export const UIBase = (function () {
             }
 
             this.parent = null;
+            this.parentChanged.trigger(null, parent);
         }
 
         // sets an attribute for this object
@@ -266,10 +447,45 @@ export const UIBase = (function () {
             }
         }
 
+        // returns true if this is a modal or is a
+        // descendant of a modal
+        belongsToModal () {
+            let parent = this;
+
+            while (parent !== null) {
+                if (parent.isModal) {
+                    return true;
+                }
+
+                parent = parent.parent;
+            }
+
+            return false;
+        }
+
+        // returns true if this object is a descendant of given
+        isDescendantOf (object) {
+            let parent = this.parent;
+
+            while (parent !== null) {
+                if (parent === object) {
+                    return true;
+                }
+
+                parent = parent.parent;
+            }
+
+            return false;
+        }
+
         // returns the final position of the object
-        getScreenPosition (screenSize = this.lastScreenSize) {
+        getScreenPosition (screenSize = this.lastScreenSize, useCanvasOffset = false) {
             // get abs position
             let thisPosition = this.positionAbsolute;
+
+            if (useCanvasOffset) {
+                thisPosition = thisPosition.add(this.getCanvasOffset());
+            }
 
             // add scale position
             if (this.parent !== null) {
@@ -309,9 +525,53 @@ export const UIBase = (function () {
             return thisSize;
         }
 
+        getAncestors () {
+            let parent = this.parent;
+
+            if (parent === null) {
+                return [];
+            }
+
+            let ancestors = [];
+
+            while (parent !== null) {
+                ancestors.push(parent);
+                parent = parent.parent;
+            }
+
+            return ancestors
+        }
+
+        hasAbsoluteVisibility () {
+            // if (!this.backgroundEnabled) {
+            //     return false;
+            // }
+
+            // if (this.transparency === 0) {
+            //     return false;
+            // }
+
+            return this.isVisibleOnScreen() || this.hasAbsoluteVisibleDescendant();
+        }
+
+        hasAbsoluteVisibleDescendant () {
+            let HAVD = false;
+
+            for (let i = 0; i < this.children.length; i++) {
+                const child = this.children[i];
+
+                if (child.hasAbsoluteVisibility() || child.hasAbsoluteVisibleDescendant()) {
+                    HAVD = true;
+                    break;
+                }
+            }
+
+            return HAVD;
+        }
+
         // returns true if the object is visible
         // on the screen
-        isVisibleOnScreen (screenSize) {
+        isVisibleOnScreen (screenSize = this.lastScreenSize, useCanvasOffset = false) {
             const visibilitySet = this.visible;
 
             // make sure it's rendering and has a parent
@@ -319,7 +579,7 @@ export const UIBase = (function () {
                 return false;
             }
 
-            const position = this.getScreenPosition(screenSize);
+            const position = this.getScreenPosition(screenSize, useCanvasOffset);
             const size = this.getScreenSize(screenSize);
 
             const withinScreenSpace = position.x + size.x >= 0 && position.x <= screenSize.x &&
@@ -341,11 +601,14 @@ export const UIBase = (function () {
                 }
 
                 if (parent.clipChildren) {
-                    const parentPosition = parent.getScreenPosition(screenSize);
+                    const parentPosition = parent.getScreenPosition(screenSize, useCanvasOffset);
                     const parentSize = parent.getScreenSize(screenSize);
 
-                    const withinParentSpace = position.x >= parentPosition.x && position.x + size.x <= parentPosition.x + parentSize.x &&
-                        position.y >= parentPosition.y && position.y + size.y <= parentPosition.y + parentSize.y;
+                    const withinParentSpace =
+                        position.x   < parentPosition.x + parentSize.x &&
+                        parentPosition.x < position.x + size.x &&
+                        position.y   < parentPosition.y + parentSize.y &&
+                        parentPosition.y < position.y + size.y;
 
                     if (!withinParentSpace) {
                         return false;

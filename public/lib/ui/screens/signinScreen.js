@@ -4,9 +4,10 @@ import { UIBase } from "../uiBase.js";
 import { UIText } from "../uiText.js";
 import { Sounds } from "../../assets/sounds.js";
 import { Auth } from "../../api/auth.js";
+import { Modal } from "../objects/modal.js";
 
 export const SignInScreen = (function () {
-    return class SignInScreen extends UIBase {
+    return class SignInScreen extends Modal {
         constructor (options) {
             super({
                 backgroundColor: '#000000',
@@ -94,6 +95,7 @@ export const SignInScreen = (function () {
                 textXAlignment: 'left',
                 textBaseLine: 'middle',
             });
+            this.emailEnter.submit.listen(() => this.doLogin());
             this.emailEnter.parentTo(this.modal);
 
             this.passwordLabel = new UIText('Password:', {
@@ -128,6 +130,7 @@ export const SignInScreen = (function () {
             this.passwordEnter.onInput.listen((contents) => {
                 this.passwordEnter.displayText = contents.replace(/./g, '*');
             });
+            this.passwordEnter.submit.listen(() => this.doLogin());
             this.passwordEnter.parentTo(this.modal);
 
             this.incorrect = new UIText('Incorrect Password', {
@@ -184,44 +187,10 @@ export const SignInScreen = (function () {
             this.bindHover(this.signIn, '#ffda84');
             this.signIn.parentTo(this.modal);
 
-            let isSigningIn = false;
+            this.isSigningIn = false;
 
-            this.signIn.mouseUp.listen(async () => {
-                const password = this.passwordEnter.text;
-                const email = this.emailEnter.text;
-                
-                let result = [
-                    Auth.validateEmail(email),
-                    Auth.validatePassword(password),
-                ];
-                result = result.filter((error) => error !== true);
+            this.signIn.mouseUp.listen(this.doLogin.bind(this));
 
-                if (result.length > 0) {
-                    this.incorrect.text = result[0];
-                    this.incorrect.visible = true;
-                    Sounds.playSfx(Sounds.SND_ERROR);
-                    return;
-                } else if (isSigningIn) {
-                    Sounds.playSfx(Sounds.SND_ERROR);
-                    return;
-                }
-
-                isSigningIn = true;
-
-                this.incorrect.visible = false;
-                const response = await ArtEditor.login(email, password);
-
-                if (response.error === undefined) {
-                    this.visible = false;
-                    this.clearInputs();
-                } else {
-                    this.incorrect.text = response.error;
-                    this.incorrect.visible = true;
-                }
-
-                isSigningIn = false;
-            });
-            
             this.cancel = new UIText('Cancel', {
                 positionScale: new Vector2(1, 1),
                 position: new Vector2(-140, -20),
@@ -238,10 +207,46 @@ export const SignInScreen = (function () {
             this.cancel.parentTo(this.modal);
 
             this.cancel.mouseUp.listen(() => {
-                isSigningIn = false;
+                this.isSigningIn = false;
                 this.visible = false;
                 this.clearInputs();
             });
+        }
+
+        async doLogin () {
+            const password = this.passwordEnter.text;
+            const email = this.emailEnter.text;
+            
+            let result = [
+                Auth.validateEmail(email),
+                Auth.validatePassword(password),
+            ];
+            result = result.filter((error) => error !== true);
+
+            if (result.length > 0) {
+                this.incorrect.text = result[0];
+                this.incorrect.visible = true;
+                Sounds.playSfx(Sounds.SND_ERROR);
+                return;
+            } else if (this.isSigningIn) {
+                Sounds.playSfx(Sounds.SND_ERROR);
+                return;
+            }
+
+            this.isSigningIn = true;
+
+            this.incorrect.visible = false;
+            const response = await ArtEditor.login(email, password);
+
+            if (response.error === undefined) {
+                this.visible = false;
+                this.clearInputs();
+            } else {
+                this.incorrect.text = response.error;
+                this.incorrect.visible = true;
+            }
+
+            this.isSigningIn = false;
         }
         
         clearInputs () {

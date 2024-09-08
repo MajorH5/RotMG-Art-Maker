@@ -25,6 +25,10 @@ import { DeleteScreen } from './deleteScreen.js';
 import { ResetPasswordScreen } from './resetPassswordScreen.js';
 import { ExportScreen } from './exportScreen.js';
 import { Constants } from '../../utils/constants.js';
+import { UIImage } from '../uiImage.js';
+import { Sprite } from '../../assets/sprite.js';
+import { PatchNotes } from '../objects/patchNotes.js';
+import { Notifications } from '../objects/notifications.js';
 
 export const EditorScreen = (function () {
     return class EditorScreen extends UIBase {
@@ -313,6 +317,67 @@ export const EditorScreen = (function () {
                 this.currentAccountScreen.notVerified.visible = ArtEditor.user === null ? false : !ArtEditor.user.details.verified;
             });
 
+            this.notificationIcon = new UIImage(Sprite.IMG_ICONS, {
+                imageRectSize: new Vector2(16, 16),
+                imageRectOffset: new Vector2(2*16, 3*16),
+                position: new Vector2(42, 5),
+                size: new Vector2(32, 32),
+                clickable: true,
+                zIndex: 999
+            });
+            this.notificationIcon.mouseUp.listen((position, mouse) => {
+                if (ArtEditor.isModalOpen() && !this.notifications.visible) return;
+                this.notificationIcon.imageRectOffset = new Vector2(1*16, 3*16);
+                this.notifications.visible = !this.notifications.visible
+
+                if (this.notifications.visible) {
+                    this.notifications.markViewed();
+                    if (this.notifications.stale) {
+                        this.notifications.loadNotifications();
+                    } else {
+                        this.notifications.stale = true;
+                    }
+
+                    this.listenForClickout(mouse, this.notifications, this.notificationIcon).then((clickedOutside) => {
+                        if (clickedOutside) {
+                            this.notifications.stale = true;
+                        }
+                    });
+                }
+            });
+            this.notificationIcon.parentTo(this);
+
+            this.updatesIcon = new UIImage(Sprite.IMG_ICONS, {
+                imageRectSize: new Vector2(16, 16),
+                imageRectOffset: localStorage.getItem('lastVersion') === Constants.VERSION ? new Vector2(2*16, 4*16) : new Vector2(1*16, 4*16),
+                position: new Vector2(84, 5),
+                size: new Vector2(32, 32),
+                clickable: true,
+                zIndex: 999
+            });
+            this.patchNotes = new PatchNotes({
+                size: new Vector2(400, 550),
+                positionScale: new Vector2(1, 1),
+                visible: false
+            });
+            this.updatesIcon.mouseUp.listen((position, mouse) => {
+                if (ArtEditor.isModalOpen()) return;
+                localStorage.setItem('lastUpdate', Constants.VERSION);
+                this.patchNotes.imageRectOffset = new Vector2(2*16, 4*16);
+                this.patchNotes.visible = !this.patchNotes.visible;
+                this.listenForClickout(mouse, this.patchNotes, this.updatesIcon);
+            });
+            this.patchNotes.parentTo(this.updatesIcon);
+            this.updatesIcon.parentTo(this);
+
+            this.notifications = new Notifications({
+                size: new Vector2(400, 550),
+                // position: new Vector2(10, 10),
+                positionScale: new Vector2(1, 1),
+                visible: false
+            });
+            this.notifications.parentTo(this.notificationIcon);
+
             this.versionText = new UIText(Constants.VERSION, {
                 font: 'myriadpro_light',
                 fontSize: 13,
@@ -324,22 +389,47 @@ export const EditorScreen = (function () {
                 positionScale: new Vector2(1, 1),
                 shadowBlur: 5,
                 textTransparency: 0.5,
-                clickable: true,
                 shadow: true,
                 zIndex: -1
-            });
-            this.versionText.mouseUp.listen(() => {
-                if (ArtEditor.isModalOpen()) {
-                    return;
-                }
-
-                ArtEditor.updateScreen.visible = true;
             });
             this.versionText.parentTo(this);
 
             this.currentPost = false;
 
             this.setupListeners();
+        }
+
+        listenForClickout (mouse, element, trigger) {
+            return new Promise((resolve) => {
+                const handler = () => {
+                    let clickedOutside = true;
+                    let hitIcon = false;
+    
+                    mouse.heldObjects.keys().forEach((object) => {
+                        if (object === trigger) {
+                            hitIcon = true;
+                        }
+    
+                        if (object.isDescendantOf(element)) {
+                            clickedOutside = false
+                        }
+                    });
+    
+                    if (clickedOutside) {
+                        if (!hitIcon) {
+                            element.visible = false;
+                        }
+                    }
+    
+                    if (!element.visible) {
+                        mouse.mouseUp.unlisten(handler);
+                    }
+
+                    resolve(clickedOutside, element.visible);
+                }
+    
+                mouse.mouseUp.listen(handler);
+            });
         }
         
         refreshPreview () {
@@ -357,9 +447,10 @@ export const EditorScreen = (function () {
                 this.signInScreen, this.signUpScreen,
                 this.currentAccountScreen, this.changePasswordScreen,
                 this.deleteScreen, this.resetPasswordScreen, this.forgotPasswordScreen,
-                this.exportScreen
+                this.exportScreen, this.notifications,
+                this.patchNotes
             ];
-            }
+        }
 
         isModalOpen () {
             return this.getModals().some((modal) => modal.visible);
@@ -522,8 +613,6 @@ export const EditorScreen = (function () {
                 canvas.width = width;
                 canvas.height = height;
 
-                console.log(width, height)
-
                 const imageData = context.createImageData(width, height);
 
                 for (let j = 0; j < pixels.length; j++) {
@@ -569,6 +658,22 @@ export const EditorScreen = (function () {
             this.currentAccountScreen.emailLabel.text = user.details.email;
             this.currentAccountScreen.visible = true;
             this.currentAccountScreen.notVerified.visible = !user.details.verified;
+            this.loadScreen.aboutScreen.commentsContainer.textEnter.placeholder = this.loadScreen.aboutScreen.commentsContainer.getPlaceHolder();
+            this.loadScreen.aboutScreen.commentsContainer.textEnter.textEditable = true;
+            this.loadScreen.aboutScreen.commentsContainer.textDisabled.visible = false;
+            this.loadScreen.aboutScreen.commentsContainer.submitDarken.visible = false;
+            this.loadScreen.aboutScreen.commentsContainer.submitButton.setDisabled(false);
+            this.notifications.infoMessage.text = 'No notifications';
+            this.notifications.clearAll.visible = true;
+            this.notifications.loadNotifications().then(() => {
+                if (this.notifications.visible) return;
+                if (this.notifications.hasUnviewedNotifications()) {
+                    this.notificationIcon.imageRectOffset = new Vector2(2*16, 3*16);
+                } else {
+                    this.notificationIcon.imageRectOffset = new Vector2(1*16, 3*16);
+                }
+                this.notifications.markViewed();
+            });
         }
         
         onUserLogout () {
@@ -578,6 +683,14 @@ export const EditorScreen = (function () {
             this.loginOut.text = 'log in';
             this.loginStatus.text = 'guest account -';
             this.currentAccountScreen.emailLabel.text = '';
+            this.loadScreen.aboutScreen.commentsContainer.textEnter.placeholder = this.loadScreen.aboutScreen.commentsContainer.getPlaceHolder();
+            this.loadScreen.aboutScreen.commentsContainer.textEnter.textEditable = false;
+            this.loadScreen.aboutScreen.commentsContainer.textDisabled.visible = true;
+            this.loadScreen.aboutScreen.commentsContainer.submitDarken.visible = true;
+            this.loadScreen.aboutScreen.commentsContainer.submitButton.setDisabled(true);
+            this.notifications.clearNotifications();
+            this.notifications.infoMessage.text = 'Log in or create an account to receive notifications';
+            this.notifications.clearAll.visible = false;
         }
 
         setCurrentFrame (frame) {
@@ -611,6 +724,8 @@ export const EditorScreen = (function () {
             });
 
             this.editorButtons.onButtonSelect.listen((button) => {
+                if (this.isModalOpen()) return;
+
                 switch (button) {
                     case EditorButtons.BUTTON_DRAW:
                         this.spriteEditor.setMode(SpriteEditor.DRAW);

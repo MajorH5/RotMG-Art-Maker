@@ -4,9 +4,10 @@ import { UIBase } from "../uiBase.js";
 import { UIText } from "../uiText.js";
 import { Sounds } from "../../assets/sounds.js";
 import { Auth } from "../../api/auth.js";
+import { Modal } from "../objects/modal.js";
 
 export const DeleteScreen = (function () {
-    return class DeleteScreen extends UIBase {
+    return class DeleteScreen extends Modal {
         constructor (options) {
             super({
                 backgroundColor: '#000000',
@@ -114,7 +115,9 @@ export const DeleteScreen = (function () {
                 if (deleting) return;
                 deleting = true;
 
-                if (this.deleteFn !== null) await this.deleteFn();
+                if (this.deleteFn !== null) {
+                    await this.deleteFn(true)
+                };
 
                 deleting = false;
                 this.visible = false;
@@ -137,6 +140,9 @@ export const DeleteScreen = (function () {
             this.cancel.parentTo(this.modal);
 
             this.cancel.mouseUp.listen(() => {
+                if (this.deleteFn !== null) {
+                    this.deleteFn(false);
+                }
                 this.visible = false;
             });
 

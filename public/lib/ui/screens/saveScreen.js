@@ -8,9 +8,10 @@ import { UITextBox } from "../uiTextBox.js";
 import { Posts } from "../../api/posts.js";
 import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
+import { Modal } from "../objects/modal.js";
 
 export const SaveScreen = (function () {
-    return class SaveScreen extends UIBase {
+    return class SaveScreen extends Modal {
         constructor (options) {
             super({
                 backgroundColor: '#000000',
@@ -232,8 +233,6 @@ export const SaveScreen = (function () {
                     ArtEditor.editorScreen.currentPost = true;
                 })
                 .catch((error) => {
-                    console.log('error saving creation', error);
-
                     if (typeof error === 'string') {
                         this.showError(error);
                     } else {

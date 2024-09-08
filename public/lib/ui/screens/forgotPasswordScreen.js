@@ -5,9 +5,10 @@ import { UIText } from "../uiText.js";
 import { Sounds } from "../../assets/sounds.js";
 import { Auth } from "../../api/auth.js";
 import { Event } from "../../utils/event.js";
+import { Modal } from "../objects/modal.js";
 
 export const ForgotPasswordScreen = (function () {
-    return class ForgotPasswordScreen extends UIBase {
+    return class ForgotPasswordScreen extends Modal {
         constructor (options) {
             super({
                 backgroundColor: '#000000',

@@ -5,6 +5,7 @@ import { Sounds } from '../../assets/sounds.js';
 import { UIText } from "../uiText.js";
 import { UIBase } from "../uiBase.js";
 import { Constants } from "../../utils/constants.js";
+import { Modal } from "../objects/modal.js";
 
 export const LegalScreen = (function () {
     const disclaimerText = `This website (www.realmspriter.com) and the tools provided herein are intended for entertainment and educational purposes only. This tool is a clone of a currently defunct tool originally created by Wildshadow Studios and is NOT associated with Realm of the Mad God (RotMG) or DECA LIVE OPERATIONS GMBH in any way.
@@ -27,7 +28,7 @@ Technical issues or maintenance requirements.
 The website owners reserve the right to remove or delete artwork without prior notice or explanation. Users acknowledge that they do not have an inherent right to the permanent storage or display of their artwork on this website.
 By selecting "I Understand", you acknowledge that you have read and understood the information provided above.`;
 
-    return class LegalScreen extends UIBase {
+    return class LegalScreen extends Modal {
         constructor () {
             super({
                 backgroundColor: '#222222',
@@ -71,47 +72,14 @@ By selecting "I Understand", you acknowledge that you have read and understood t
             });
             this.header.parentTo(this.modal);
 
-            this.scrollBar = new UIBase({
-                sizeScale: new Vector2(0, 1),
-                size: new Vector2(10, 0),
-                positionScale: new Vector2(1, 0),
-                pivot: new Vector2(1, 0),
-                backgroundColor: '#444444',
-                backgroundEnabled: true,
-                visible: false
-            });
-            this.scrollIndicator = new UIBase({
-                sizeScale: new Vector2(1, 0.1),
-                positionScale: new Vector2(0.5, 0),
-                pivot: new Vector2(0.5, 0),
-                backgroundColor: '#666666',
-                backgroundEnabled: true
-            });
-            this.scrollIndicator.parentTo(this.scrollBar);
-
             this.container = new UIBase({
                 sizeScale: new Vector2(1, 0.7),
                 positionScale: new Vector2(0.5, 0.5),
                 pivot: new Vector2(0.5, 0.5),
                 clipChildren: true
             });
-            this.scrollBar.parentTo(this.container);
-
-            let scrollAmmount = 0;
-            let scrollSpeed = 20;
-
-            this.container.scrolled.listen((direction) => {
-                scrollAmmount += direction * scrollSpeed;
-
-                if (scrollAmmount > 0) {
-                    scrollAmmount = 0;
-                } else if (scrollAmmount < -420) {
-                    scrollAmmount = -420;
-                }
-
-                this.disclaimer.positionAbsolute = new Vector2(0, scrollAmmount);
-            });
-
+            this.container.scrollableY = true;
+            this.container.canvasSize = new Vector2(0, 420);
             this.container.parentTo(this.modal);
 
             this.disclaimer = new UIText(disclaimerText, {
@@ -140,12 +108,8 @@ By selecting "I Understand", you acknowledge that you have read and understood t
             this.understand.parentTo(this.modal);
 
             this.understand.mouseUp.listen(() => {
-                if (localStorage.getItem('lastUpdate') !== Constants.VERSION) {
-                    ArtEditor.updateScreen.visible = true;
-                } else {
-                    Sounds.playTheme(Sounds.SND_THEME);
-                    ArtEditor.performKeybinds();
-                }
+                Sounds.playTheme(Sounds.SND_THEME);
+                ArtEditor.performKeybinds();
                 this.visible = false;
             });
         }

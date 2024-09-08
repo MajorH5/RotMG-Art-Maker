@@ -38,7 +38,6 @@ export const Object = (function () {
                         resolve(texture);
                     })
                     .catch((error) => {
-                        console.log(error);
                         resolve(null); // TODO: how should this case be handled
                     });
             });

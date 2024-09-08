@@ -3,7 +3,7 @@ import { API } from "./api.js";
 export const Posts = (function (){
     return class Posts {
         static async createPost (name, tags, image, type, isAnimated) {
-            return API.post('/create-post', { name, tags, image, type, isAnimated, token: ArtEditor.user.token });
+            return API.post('/create-post', { name, tags, image, type, isAnimated, token: ArtEditor.user?.token });
         }
 
         static async deletePost (postid) {
@@ -12,10 +12,18 @@ export const Posts = (function (){
 
         static async getPosts (mineOnly = true, tags = [], type  = '', offset) {
             if (mineOnly) {
-                return API.post('/get-posts', { mineOnly, tags, type, offset, token: ArtEditor.user.token });
+                return API.post('/get-posts', { mineOnly, tags, type, offset, token: ArtEditor.user?.token });
             } else {
                 return API.post('/get-posts', { mineOnly, tags, type, offset });
             }
+        }
+        
+        static async reportPost (postid, reason) {
+            return API.post('/report-post', { postid, reason, token: ArtEditor.user?.token });
+        }
+
+        static async getPost (postid) {
+            return API.post('/get-post', { postid });
         }
     }
 })();
