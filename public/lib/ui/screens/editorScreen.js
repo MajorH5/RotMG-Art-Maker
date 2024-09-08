@@ -319,7 +319,7 @@ export const EditorScreen = (function () {
 
             this.notificationIcon = new UIImage(Sprite.IMG_ICONS, {
                 imageRectSize: new Vector2(16, 16),
-                imageRectOffset: new Vector2(2*16, 3*16),
+                imageRectOffset: new Vector2(1*16, 3*16),
                 position: new Vector2(42, 5),
                 size: new Vector2(32, 32),
                 clickable: true,
@@ -349,7 +349,7 @@ export const EditorScreen = (function () {
 
             this.updatesIcon = new UIImage(Sprite.IMG_ICONS, {
                 imageRectSize: new Vector2(16, 16),
-                imageRectOffset: localStorage.getItem('lastVersion') === Constants.VERSION ? new Vector2(2*16, 4*16) : new Vector2(1*16, 4*16),
+                imageRectOffset: localStorage.getItem('lastUpdate') === Constants.VERSION ? new Vector2(1*16, 4*16) : new Vector2(2*16, 4*16),
                 position: new Vector2(84, 5),
                 size: new Vector2(32, 32),
                 clickable: true,
@@ -363,7 +363,7 @@ export const EditorScreen = (function () {
             this.updatesIcon.mouseUp.listen((position, mouse) => {
                 if (ArtEditor.isModalOpen()) return;
                 localStorage.setItem('lastUpdate', Constants.VERSION);
-                this.patchNotes.imageRectOffset = new Vector2(2*16, 4*16);
+                this.updatesIcon.imageRectOffset = new Vector2(1*16, 4*16);
                 this.patchNotes.visible = !this.patchNotes.visible;
                 this.listenForClickout(mouse, this.patchNotes, this.updatesIcon);
             });
