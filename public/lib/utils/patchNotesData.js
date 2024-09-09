@@ -20,6 +20,10 @@ export const PatchNotesData = (function () {
                 'Posts are public by default'
             ],
             ['Bug fixes and performance improvements'],
+            ['Improved UI/UX'],
+            ['Fixed issue with random sign out', 
+                'Users were signed out after a short period of time'
+            ]
         ],
 
         'v1.0.2': [
