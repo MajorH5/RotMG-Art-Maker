@@ -111,7 +111,7 @@ export const CurrentAccountScreen = (function () {
                 Auth.resendVerificationEmail(ArtEditor.user.token).then((result) => {
                     if (result.error === 'User is already verified') {
                         ArtEditor.user.details.verified = true;
-                        Auth.setCookie('jwt', Auth.encodeUser(ArtEditor.user), 1);
+                        Auth.setCookie('jwt', Auth.encodeUser(ArtEditor.user), 90);
                         this.notVerified.visible = false;
                         this.incorrect.visible = true;
                         this.incorrect.text = 'You\'re already verified';

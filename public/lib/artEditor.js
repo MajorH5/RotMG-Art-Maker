@@ -148,7 +148,7 @@ export const ArtEditor = (function () {
 
                 if (user.error === undefined) {
                     this.user = user;
-                    Auth.setCookie('jwt', Auth.encodeUser(user));
+                    Auth.setCookie('jwt', Auth.encodeUser(user), 90);
                     this.editorScreen.onUserLogin(user);
 
                     this.editorScreen.currentAccountScreen.visible = false;
@@ -299,7 +299,7 @@ export const ArtEditor = (function () {
             return Auth.signIn(email, password).then((result) => {
                 if (result.error === undefined) {
                     this.user = result;
-                    Auth.setCookie('jwt', Auth.encodeUser(result));
+                    Auth.setCookie('jwt', Auth.encodeUser(result), 90);
                     this.editorScreen.onUserLogin(result);
                 }
 
