@@ -84,12 +84,20 @@ export const UIManager = (function () {
                 const [mouse] = this.mouses;
                 
                 mouse.setScroll(direction);
-                event.preventDefault();
+
+                const held = Array.from(mouse.insideObjects.keys());
+
+                if (held.some((object) => object.scrollableX || object.scrollableY || object.scrollable)) {
+                    event.preventDefault();
+                }
             });
 
             document.addEventListener('keydown', (event) => {
                 if (UITextBox.current !== null && !Constants.MOBILE_ENVIRONMENT) {
                     UITextBox.current.handleKeyInput(event);
+                    event.preventDefault();
+                } else if (event.key === ' ' || event.key === 'Tab') {
+                    event.preventDefault();
                 }
             });
 

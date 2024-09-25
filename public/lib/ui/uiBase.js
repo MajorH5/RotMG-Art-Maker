@@ -33,6 +33,7 @@ export const UIBase = (function () {
 
             this.scrollableX = options.scrollableX || false;
             this.scrollableY = options.scrollableY || false;
+            this.scrollable = options.scrollableX || options.scrollableY || options.scrollable || false;
             this.isModal = options.isModal || false;
             this.absorbsAllInput = options.absorbsAllInput || false;
 

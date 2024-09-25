@@ -157,6 +157,11 @@ export const ArtEditor = (function () {
                 }
             }
 
+            // so that mobile keyboard works properly on inputs
+            if (Constants.MOBILE_ENVIRONMENT) {
+                this.canvas.tabIndex = 1;
+            }
+
             this.initialized = true;
             this.initializing = false;
         }

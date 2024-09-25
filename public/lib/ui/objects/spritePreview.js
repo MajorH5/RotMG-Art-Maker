@@ -23,6 +23,7 @@ export const SpritePreview = (function () {
 
                 borderSize: 0.5,
                 borderColor: '#ffffff',
+                scrollable: true,
 
                 ...options
             });
