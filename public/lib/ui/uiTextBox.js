@@ -126,6 +126,10 @@ export const UITextBox = (function () {
                 event.preventDefault();
             }
 
+            if (event.key === ' ' || event.key === 'Tab') {
+                event.preventDefault();
+            }
+
             switch (key) {
                 case 'Backspace':
                     if (this.selectionStart === this.selectionEnd) {
@@ -256,6 +260,7 @@ export const UITextBox = (function () {
         }
 
         oncut (event) {
+            console.log("we cut")
             if (!this.textEditable) return;
             
             event.preventDefault();

@@ -71,7 +71,7 @@ export const UIManager = (function () {
                 canvas.blur();
             });
 
-            canvas.addEventListener('focus', () => {
+            canvas.addEventListener('focus', () => {                
                 if (UITextBox.current !== null) {
                     document.getElementById('mobile-inputs').focus();
                 } else {
@@ -95,9 +95,6 @@ export const UIManager = (function () {
             document.addEventListener('keydown', (event) => {
                 if (UITextBox.current !== null && !Constants.MOBILE_ENVIRONMENT) {
                     UITextBox.current.handleKeyInput(event);
-                    event.preventDefault();
-                } else if (event.key === ' ' || event.key === 'Tab') {
-                    event.preventDefault();
                 }
             });
 
